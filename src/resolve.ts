@@ -70,6 +70,16 @@ function decodeAttribute(encoded: Hex): Attribute {
         amountFormula: decodeFormula(amountFormula),
       };
     }
+    case 'RevertPolicy': {
+      const [policy, expectedReason] = decoded.args;
+      switch (policy) {
+        case 'drop':
+        case 'ignore':
+          return { type: 'RevertPolicy', policy, expectedReason };
+        default:
+          throw new Error(`Unsupported revert policy: ${policy}`);
+      }
+    }
     case 'RequiredBefore': {
       const [deadline] = decoded.args;
       return { type: 'RequiredBefore', deadline };
@@ -154,6 +164,25 @@ function decodeVariableRole(encoded: Hex): VariableRole {
     case 'Query': {
       const [target, selector, arguments_, blockNumber] = decoded.args;
       return { type: 'Query', target: decodeERC7930Address(target), selector, arguments: arguments_.map(decodeArgument), blockNumber };
+    }
+    case 'QueryEvents': {
+      const [emitter, topicMatch, topic0, topic1, topic2, topic3] = decoded.args;
+      const queryEvents: VariableRole = {
+        type: 'QueryEvents',
+        emitter: decodeERC7930Address(emitter),
+        topic0,
+        topic1,
+        topic2,
+        topic3,
+      };
+
+      const mask = hexToNumber(topicMatch);
+      if (!(mask & (1 << 0))) delete queryEvents.topic0;
+      if (!(mask & (1 << 1))) delete queryEvents.topic1;
+      if (!(mask & (1 << 2))) delete queryEvents.topic2;
+      if (!(mask & (1 << 3))) delete queryEvents.topic3;
+
+      return queryEvents;
     }
     default: {
       decoded.args satisfies readonly [];

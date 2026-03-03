@@ -170,11 +170,10 @@ export interface VariableRole_Query {
 export interface VariableRole_QueryEvents {
   type: 'QueryEvents';
   emitter: Account;
-  topicMatch: Hex;
-  topic0: Hex;
-  topic1: Hex;
-  topic2: Hex;
-  topic3: Hex;
+  topic0?: Hex;
+  topic1?: Hex;
+  topic2?: Hex;
+  topic3?: Hex;
 }
 
 export interface Assumption {
