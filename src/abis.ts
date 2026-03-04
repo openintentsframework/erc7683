@@ -38,5 +38,8 @@ export const variableRoleAbi = parseAbi([
   'function TxOutput() external',
   'function Witness(string kind, bytes data, uint256[] variables) external',
   'function Query(bytes target, bytes4 selector, bytes[] arguments, uint256 blockNumber) external',
-  'function QueryEvents(bytes emitter, bytes1 topicMatch, bytes32 topic0, bytes32 topic1, bytes32 topic2, bytes32 topic3) external',
+  'function QueryEvents(bytes emitter, bytes1 topicMatch, bytes32 topic0, bytes32 topic1, bytes32 topic2, bytes32 topic3, uint256 blockNumber) external',
 ]);
+
+export const ethLogStruct =
+  'struct EthLog { address emitter; bytes32[] topics; bytes data; uint256 blockNumber; bytes32 transactionHash; uint256 transactionIndex; bytes32 blockHash; uint256 logIndex; }';

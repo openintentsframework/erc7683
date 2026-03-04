@@ -174,6 +174,7 @@ export interface VariableRole_QueryEvents {
   topic1?: Hex;
   topic2?: Hex;
   topic3?: Hex;
+  blockNumber: bigint;
 }
 
 export interface Assumption {

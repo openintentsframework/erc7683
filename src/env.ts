@@ -1,7 +1,8 @@
-import { concat, decodeAbiParameters, numberToHex, size, type Hex } from 'viem';
-import type { Account, Argument, Formula, VariableRole } from './types.ts';
+import { concat, decodeAbiParameters, encodeAbiParameters, formatLog, numberToHex, parseAbiParameters, size, type Hex, type Log } from 'viem';
+import type { Account, Argument, Formula, VariableRole, VariableRole_QueryEvents } from './types.ts';
 import type { SolverContext } from './context.ts';
 import { abiEncode, decodeAbiWrappedValue, type AbiEncodedValue } from './abi-wrap.ts';
+import { ethLogStruct } from './abis.ts';
 
 // Assumes resolver does not create dependency cycles between variables.
 export class VariableEnv {
@@ -58,7 +59,7 @@ export class VariableEnv {
       }
 
       case 'QueryEvents': {
-        throw new Error('TODO');
+        return await envGetLogs(this.ctx, role);
       }
 
       case 'Pricing':
@@ -134,6 +135,42 @@ export async function envSimulateCall(
     throw new Error('simulateCalls returned no results');
   }
   return { gasUsed: result.gasUsed, status: result.status };
+}
+
+async function envGetLogs(
+  ctx: SolverContext,
+  spec: VariableRole_QueryEvents,
+): Promise<AbiEncodedValue> {
+  const client = ctx.getPublicClient(spec.emitter.chainId);
+
+  const rpcLogs = await client.request({
+    method: 'eth_getLogs',
+    params: [{
+      address: spec.emitter.address,
+      fromBlock: numberToHex(spec.blockNumber),
+      toBlock: numberToHex(spec.blockNumber),
+      topics: [
+        spec.topic0 ?? null,
+        spec.topic1 ?? null,
+        spec.topic2 ?? null,
+        spec.topic3 ?? null,
+      ],
+    }],
+  });
+
+  const decodedLogs = rpcLogs.map(rpcLog => {
+    const log = formatLog(rpcLog) as Log<bigint, number, false>;
+    return {
+      ...log,
+      emitter: log.address,
+      transactionIndex: BigInt(log.transactionIndex),
+      logIndex: BigInt(log.logIndex),
+    };
+  });
+
+  return decodeAbiWrappedValue(
+    encodeAbiParameters(parseAbiParameters(['EthLog[]', ethLogStruct]), [decodedLogs]),
+  );
 }
 
 export async function buildCallData(env: VariableEnv, spec: CallSpec): Promise<Hex> {

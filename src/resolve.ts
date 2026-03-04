@@ -166,7 +166,7 @@ function decodeVariableRole(encoded: Hex): VariableRole {
       return { type: 'Query', target: decodeERC7930Address(target), selector, arguments: arguments_.map(decodeArgument), blockNumber };
     }
     case 'QueryEvents': {
-      const [emitter, topicMatch, topic0, topic1, topic2, topic3] = decoded.args;
+      const [emitter, topicMatch, topic0, topic1, topic2, topic3, blockNumber] = decoded.args;
       const queryEvents: VariableRole = {
         type: 'QueryEvents',
         emitter: decodeERC7930Address(emitter),
@@ -174,6 +174,7 @@ function decodeVariableRole(encoded: Hex): VariableRole {
         topic1,
         topic2,
         topic3,
+        blockNumber,
       };
 
       const mask = hexToNumber(topicMatch);
