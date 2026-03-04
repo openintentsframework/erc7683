@@ -88,16 +88,6 @@ function decodeAttribute(encoded: Hex): Attribute {
       const [exclusiveFiller, deadline] = decoded.args;
       return { type: 'RequiredFillerUntil', exclusiveFiller, deadline };
     }
-    case 'RequiredCallResult': {
-      const [target, selector, arguments_, result] = decoded.args;
-      return {
-        type: 'RequiredCallResult',
-        target: decodeERC7930Address(target),
-        selector,
-        arguments: arguments_.map(decodeArgument),
-        result,
-      };
-    }
     case 'WithTimestamp': {
       const [timestampVarIdx] = decoded.args;
       return { type: 'WithTimestamp', timestampVarIdx: toSafeNumber(timestampVarIdx) };

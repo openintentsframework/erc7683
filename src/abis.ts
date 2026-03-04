@@ -16,7 +16,6 @@ export const attributeAbi = parseAbi([
   'function RevertPolicy(string policy, bytes expectedReason) external',
   'function RequiredBefore(uint256 deadline) external',
   'function RequiredFillerUntil(address exclusiveFiller, uint256 deadline) external',
-  'function RequiredCallResult(bytes target, bytes4 selector, bytes[] arguments, bytes result) external',
   'function WithTimestamp(uint256 timestampVarIdx) external',
   'function WithBlockNumber(uint256 blockNumberVarIdx) external',
   'function WithEffectiveGasPrice(uint256 gasPriceVarIdx) external',

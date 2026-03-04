@@ -32,7 +32,6 @@ export interface Attributes {
 
   RequiredBefore?: Attribute_RequiredBefore;
   RequiredFillerUntil?: Attribute_RequiredFillerUntil;
-  RequiredCallResult?: Attribute_RequiredCallResult;
 
   WithTimestamp?: Attribute_WithTimestamp;
   WithBlockNumber?: Attribute_WithBlockNumber;
@@ -45,7 +44,6 @@ export type Attribute =
   | Attribute_RevertPolicy
   | Attribute_RequiredBefore
   | Attribute_RequiredFillerUntil
-  | Attribute_RequiredCallResult
   | Attribute_WithTimestamp
   | Attribute_WithBlockNumber
   | Attribute_WithEffectiveGasPrice;
@@ -78,14 +76,6 @@ export interface Attribute_RequiredFillerUntil {
   type: 'RequiredFillerUntil';
   exclusiveFiller: Address;
   deadline: bigint;
-}
-
-export interface Attribute_RequiredCallResult {
-  type: 'RequiredCallResult';
-  target: Account;
-  selector: Hex; // bytes4
-  arguments: Argument[];
-  result: Hex;
 }
 
 export interface Attribute_WithTimestamp {
