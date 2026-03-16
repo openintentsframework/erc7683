@@ -12,7 +12,7 @@ export const stepAbi = parseAbi([
 
 export const attributeAbi = parseAbi([
   'function SpendsERC20(bytes token, bytes amountFormula, bytes spender, bytes receiver) external',
-  'function SpendsEstimatedGas(bytes amountFormula) external',
+  'function SpendsGas(bytes amountFormula) external',
   'function Outputs(string field, uint256 varIdx, bytes lowerBound, bytes upperBound) external',
   'function NeedsStep(uint256 stepIdx) external',
   'function RevertPolicy(string policy, bytes expectedReason) external',

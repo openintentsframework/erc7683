@@ -36,7 +36,7 @@ export function getStepSpends(order: ResolvedOrder, stepIdx: number): Spends {
     if (attribute.type === 'SpendsERC20')
       spends.erc20.push(attribute);
 
-    if (attribute.type === 'SpendsEstimatedGas') {
+    if (attribute.type === 'SpendsGas') {
       if (spends.gas !== undefined)
         throw new Error(`Multiple ${attribute.type} attributes`);
       spends.gas = attribute.amount;

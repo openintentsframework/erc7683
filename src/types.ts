@@ -27,7 +27,7 @@ export interface Step_Call {
 
 export type Attribute =
   | Attribute_SpendsERC20
-  | Attribute_SpendsEstimatedGas
+  | Attribute_SpendsGas
   | Attribute_Outputs
   | Attribute_NeedsStep
   | Attribute_RevertPolicy;
@@ -47,8 +47,8 @@ export interface Attribute_SpendsERC20 {
   receiver: Account;
 }
 
-export interface Attribute_SpendsEstimatedGas {
-  type: 'SpendsEstimatedGas';
+export interface Attribute_SpendsGas {
+  type: 'SpendsGas';
   amount: Formula;
 }
 

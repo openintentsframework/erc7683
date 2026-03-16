@@ -68,10 +68,10 @@ function decodeAttribute(encoded: Hex): Attribute {
         receiver: decodeERC7930Address(receiver),
       };
     }
-    case 'SpendsEstimatedGas': {
+    case 'SpendsGas': {
       const [amountFormula] = decoded.args;
       return {
-        type: 'SpendsEstimatedGas',
+        type: 'SpendsGas',
         amount: decodeFormula(amountFormula),
       };
     }
