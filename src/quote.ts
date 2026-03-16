@@ -1,7 +1,8 @@
 import type { Address } from 'viem';
-import type { Formula, ResolvedOrder, Step } from './types.ts';
+import { getStepSpends } from './analysis.ts';
 import type { SolverContext } from './context.ts';
 import { VariableEnv, envSimulateCall, envEval } from './env.ts';
+import type { Formula, ResolvedOrder, Step } from './types.ts';
 
 interface QuoteResult {
   env: VariableEnv; // resolved variables, passed to fill
@@ -17,7 +18,8 @@ export async function quote(
   const pricingVars = collectPricingVars(order);
   if (pricingVars.length > 0) {
     // TODO: use black box optimization to find values based on computed pnl
-    // NOTE: WithTimestamp values must be compatible with RequiredBefore (+ slack)
+    // NOTE: pricing decisions that constrain realized execution outputs
+    // must remain compatible with hard step deadlines and execution slack.
     throw new Error('Pricing variables not supported');
   }
 
@@ -79,7 +81,8 @@ export interface GasFlow<TAmount> {
 function collectFlowFormulas(order: ResolvedOrder): AssetFlow<Formula>[] {
   const flows: AssetFlow<Formula>[] = [];
 
-  for (const step of order.steps) {
+  for (const [stepIdx, step] of order.steps.entries()) {
+    const spends = getStepSpends(order, stepIdx);
     const gasFlow: GasFlow<Formula> = {
       chainId: step.target.chainId,
       token: 'gas',
@@ -89,18 +92,18 @@ function collectFlowFormulas(order: ResolvedOrder): AssetFlow<Formula>[] {
 
     flows.push(gasFlow);
 
-    for (const attribute of step.attributes.SpendsERC20) {
+    for (const attribute of spends.erc20) {
       flows.push({
         chainId: attribute.token.chainId,
         token: attribute.token.address,
-        amount: attribute.amountFormula,
+        amount: attribute.amount,
         sign: -1n,
       });
     }
 
-    const gasEstimate = step.attributes.SpendsEstimatedGas;
+    const gasEstimate = spends.gas;
     if (gasEstimate) {
-      gasFlow.amount = gasEstimate.amountFormula;
+      gasFlow.amount = gasEstimate;
     }
 
     for (const payment of step.payments) {
@@ -111,7 +114,7 @@ function collectFlowFormulas(order: ResolvedOrder): AssetFlow<Formula>[] {
         flows.push({
           chainId: payment.token.chainId,
           token: payment.token.address,
-          amount: payment.amountFormula,
+          amount: payment.amount,
           sign: 1n,
         });
       }
@@ -126,7 +129,7 @@ function collectFlowFormulas(order: ResolvedOrder): AssetFlow<Formula>[] {
       flows.push({
         chainId: payment.token.chainId,
         token: payment.token.address,
-        amount: payment.amountFormula,
+        amount: payment.amount,
         sign: 1n,
       });
     }

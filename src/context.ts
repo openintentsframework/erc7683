@@ -4,6 +4,11 @@ import type { AbiEncodedValue } from './abi-wrap.ts';
 
 export type WalletClient = ViemWalletClient<Transport, Chain>;
 
+export interface ConfirmationThreshold {
+  etaFromBroadcast: number;
+  confirmations: number;
+}
+
 export interface SolverContext {
   getPublicClient: (chainId: bigint) => PublicClient;
   getWalletClient: (chainId: bigint) => WalletClient;
@@ -14,6 +19,10 @@ export interface SolverContext {
   getWitnessResolver: (kind: string) => WitnessResolver | undefined;
   getTokenPriceUsd: (token: Account) => bigint;
   getGasPriceUsd: (chainId: bigint) => bigint;
+
+  getConfirmationThreshold: (chainId: bigint, flows: unknown) => ConfirmationThreshold;
+  getTimeToBlock: (chainId: bigint, targetBlockNumber: bigint | number, flows: unknown) => number;
+  getWitnessDelay: (kind: string, data: Hex) => number;
 }
 
 interface WitnessResolver {

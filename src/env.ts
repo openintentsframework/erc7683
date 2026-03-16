@@ -21,7 +21,7 @@ export class VariableEnv {
     const role = this.roles[varIdx]!;
     switch (role.type) {
       case 'Pricing':
-      case 'TxOutput':
+      case 'ExecutionOutput':
       case 'Witness': {
         this.cache[varIdx] = { value: Promise.resolve(value), tick: this.tick++ };
         break;
@@ -63,7 +63,7 @@ export class VariableEnv {
       }
 
       case 'Pricing':
-      case 'TxOutput':
+      case 'ExecutionOutput':
       case 'Witness': {
         throw new Error(`Variable ${varIdx} (${role.type}) not set`);
       }
@@ -183,7 +183,7 @@ export async function buildCallData(env: VariableEnv, spec: CallSpec): Promise<H
   return abiEncodeFunctionCall(spec.selector, argValues);
 }
 
-export function abiEncodeFunctionCall(selector: Hex, abiEncodedValues: AbiEncodedValue[]): Hex {
+function abiEncodeFunctionCall(selector: Hex, abiEncodedValues: AbiEncodedValue[]): Hex {
   if (size(selector) !== 4) {
     throw new Error('Selector must be 4 bytes');
   }

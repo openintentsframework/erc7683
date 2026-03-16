@@ -1,4 +1,5 @@
 import type { Address, Hex } from 'viem';
+
 import type { AbiEncodedValue } from './abi-wrap.ts';
 
 export interface ResolvedOrder {
@@ -20,77 +21,51 @@ export interface Step_Call {
   target: Account;
   selector: Hex; // bytes4
   arguments: Argument[];
-  attributes: Attributes;
+  attributes: Attribute[];
   payments: Payment[];
-}
-
-export interface Attributes {
-  SpendsERC20: Attribute_SpendsERC20[];
-  SpendsEstimatedGas?: Attribute_SpendsEstimatedGas;
-
-  RevertPolicy: Attribute_RevertPolicy[];
-
-  RequiredBefore?: Attribute_RequiredBefore;
-  RequiredFillerUntil?: Attribute_RequiredFillerUntil;
-
-  WithTimestamp?: Attribute_WithTimestamp;
-  WithBlockNumber?: Attribute_WithBlockNumber;
-  WithEffectiveGasPrice?: Attribute_WithEffectiveGasPrice;
 }
 
 export type Attribute =
   | Attribute_SpendsERC20
   | Attribute_SpendsEstimatedGas
-  | Attribute_RevertPolicy
-  | Attribute_RequiredBefore
-  | Attribute_RequiredFillerUntil
-  | Attribute_WithTimestamp
-  | Attribute_WithBlockNumber
-  | Attribute_WithEffectiveGasPrice;
+  | Attribute_Outputs
+  | Attribute_NeedsStep
+  | Attribute_RevertPolicy;
+
+export interface OutputBinding {
+  field: string;
+  varIdx: number;
+  lowerBound?: Formula;
+  upperBound?: Formula;
+}
 
 export interface Attribute_SpendsERC20 {
   type: 'SpendsERC20';
   token: Account;
-  amountFormula: Formula;
+  amount: Formula;
   spender: Account;
   receiver: Account;
 }
 
 export interface Attribute_SpendsEstimatedGas {
   type: 'SpendsEstimatedGas';
-  amountFormula: Formula;
+  amount: Formula;
+}
+
+export interface Attribute_Outputs {
+  type: 'Outputs';
+  output: OutputBinding;
+}
+
+export interface Attribute_NeedsStep {
+  type: 'NeedsStep';
+  stepIdx: number;
 }
 
 export interface Attribute_RevertPolicy {
   type: 'RevertPolicy';
   policy: 'drop' | 'ignore'; // TODO: 'retry';
   expectedReason: Hex;
-}
-
-export interface Attribute_RequiredBefore {
-  type: 'RequiredBefore';
-  deadline: bigint;
-}
-
-export interface Attribute_RequiredFillerUntil {
-  type: 'RequiredFillerUntil';
-  exclusiveFiller: Address;
-  deadline: bigint;
-}
-
-export interface Attribute_WithTimestamp {
-  type: 'WithTimestamp';
-  timestampVarIdx: number;
-}
-
-export interface Attribute_WithBlockNumber {
-  type: 'WithBlockNumber';
-  blockNumberVarIdx: number;
-}
-
-export interface Attribute_WithEffectiveGasPrice {
-  type: 'WithEffectiveGasPrice';
-  gasPriceVarIdx: number;
 }
 
 export type Formula = Formula_Constant | Formula_Variable;
@@ -111,7 +86,7 @@ export interface Payment_ERC20 {
   type: 'ERC20';
   token: Account;
   sender: Account;
-  amountFormula: Formula;
+  amount: Formula;
   recipientVarIdx: number;
   estimatedDelaySeconds: bigint;
 }
@@ -120,7 +95,7 @@ export type VariableRole =
   | VariableRole_PaymentRecipient
   | VariableRole_PaymentChain
   | VariableRole_Pricing
-  | VariableRole_TxOutput
+  | VariableRole_ExecutionOutput
   | VariableRole_Witness
   | VariableRole_Query
   | VariableRole_QueryEvents;
@@ -138,8 +113,8 @@ export interface VariableRole_Pricing {
   type: 'Pricing';
 }
 
-export interface VariableRole_TxOutput {
-  type: 'TxOutput';
+export interface VariableRole_ExecutionOutput {
+  type: 'ExecutionOutput';
 }
 
 export interface VariableRole_Witness {

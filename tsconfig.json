@@ -5,7 +5,6 @@
     "target": "esnext",
     "types": [],
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
     "strict": true,
     "verbatimModuleSyntax": true,
     "isolatedModules": true,

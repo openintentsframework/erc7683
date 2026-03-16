@@ -1,6 +1,6 @@
 import type { Hex, Address, PublicClient } from 'viem';
 import { decodeFunctionData, getAddress, toHex, hexToBigInt, hexToNumber, size, slice } from 'viem';
-import type { Attributes, Attribute, ResolvedOrder, Account, Argument, Formula, Payment, Step, VariableRole } from './types.ts';
+import type { Attribute, ResolvedOrder, Account, Argument, Formula, Payment, Step, VariableRole } from './types.ts';
 import { resolverAbi, attributeAbi, formulaAbi, paymentAbi, stepAbi, variableRoleAbi } from './abis.ts';
 import { decodeAbiWrappedValue } from './abi-wrap.ts';
 
@@ -15,8 +15,15 @@ export async function resolve(client: PublicClient, resolver: Address, payload: 
   return {
     steps: result.steps.map(decodeStep),
     variables: result.variables.map(decodeVariableRole),
-    assumptions: result.assumptions.map(a => ({ trusted: decodeERC7930Address(a.trusted), kind: a.kind })),
+    assumptions: result.assumptions.map(decodeAssumption),
     payments: result.payments.map(decodePayment),
+  };
+}
+
+function decodeAssumption(encoded: { trusted: Hex; kind: string }) {
+  return {
+    trusted: decodeERC7930Address(encoded.trusted),
+    kind: encoded.kind,
   };
 }
 
@@ -32,7 +39,7 @@ function decodeStep(data: Hex): Step {
         target: decodeERC7930Address(target),
         selector,
         arguments: arguments_.map(decodeArgument),
-        attributes: decodeAttributes(attributes),
+        attributes: attributes.map(decodeAttribute),
         payments: payments.map(decodePayment),
       };
     }
@@ -41,9 +48,7 @@ function decodeStep(data: Hex): Step {
 
 function decodeArgument(encoded: Hex): Argument {
   if (size(encoded) === 32) {
-    // Variable: decode as index
-    const varIdx = hexToNumber(encoded);
-    return { type: 'Variable', varIdx };
+    return { type: 'Variable', varIdx: hexToNumber(encoded) };
   } else {
     return { type: 'AbiEncodedValue', value: decodeAbiWrappedValue(encoded) };
   }
@@ -58,7 +63,7 @@ function decodeAttribute(encoded: Hex): Attribute {
       return {
         type: 'SpendsERC20',
         token: decodeERC7930Address(token),
-        amountFormula: decodeFormula(amountFormula),
+        amount: decodeFormula(amountFormula),
         spender: decodeERC7930Address(spender),
         receiver: decodeERC7930Address(receiver),
       };
@@ -67,7 +72,26 @@ function decodeAttribute(encoded: Hex): Attribute {
       const [amountFormula] = decoded.args;
       return {
         type: 'SpendsEstimatedGas',
-        amountFormula: decodeFormula(amountFormula),
+        amount: decodeFormula(amountFormula),
+      };
+    }
+    case 'Outputs': {
+      const [field, varIdx, lowerBound, upperBound] = decoded.args;
+      return {
+        type: 'Outputs',
+        output: {
+          field,
+          varIdx: toSafeNumber(varIdx),
+          lowerBound: decodeOptionalFormula(lowerBound),
+          upperBound: decodeOptionalFormula(upperBound),
+        },
+      };
+    }
+    case 'NeedsStep': {
+      const [stepIdx] = decoded.args;
+      return {
+        type: 'NeedsStep',
+        stepIdx: toSafeNumber(stepIdx),
       };
     }
     case 'RevertPolicy': {
@@ -80,48 +104,7 @@ function decodeAttribute(encoded: Hex): Attribute {
           throw new Error(`Unsupported revert policy: ${policy}`);
       }
     }
-    case 'RequiredBefore': {
-      const [deadline] = decoded.args;
-      return { type: 'RequiredBefore', deadline };
-    }
-    case 'RequiredFillerUntil': {
-      const [exclusiveFiller, deadline] = decoded.args;
-      return { type: 'RequiredFillerUntil', exclusiveFiller, deadline };
-    }
-    case 'WithTimestamp': {
-      const [timestampVarIdx] = decoded.args;
-      return { type: 'WithTimestamp', timestampVarIdx: toSafeNumber(timestampVarIdx) };
-    }
-    case 'WithBlockNumber': {
-      const [blockNumberVarIdx] = decoded.args;
-      return { type: 'WithBlockNumber', blockNumberVarIdx: toSafeNumber(blockNumberVarIdx) };
-    }
-    case 'WithEffectiveGasPrice': {
-      const [gasPriceVarIdx] = decoded.args;
-      return { type: 'WithEffectiveGasPrice', gasPriceVarIdx: toSafeNumber(gasPriceVarIdx) };
-    }
   }
-}
-
-function decodeAttributes(encoded: readonly Hex[]): Attributes {
-  const attributes: Attributes = { SpendsERC20: [], RevertPolicy: [] };
-
-  for (const entry of encoded) {
-    const decoded = decodeAttribute(entry);
-    if (decoded.type === 'SpendsERC20') {
-      attributes.SpendsERC20.push(decoded);
-    } else if (decoded.type === 'RevertPolicy') {
-      attributes.RevertPolicy.push(decoded);
-    } else {
-      if (decoded.type in attributes) {
-        throw new Error(`Multiple ${decoded.type} attributes`);
-      }
-      /// @ts-ignore: TypeScript is not able to type this
-      attributes[decoded.type] = decoded;
-    }
-  }
-
-  return attributes;
 }
 
 function decodeFormula(encoded: Hex): Formula {
@@ -137,6 +120,10 @@ function decodeFormula(encoded: Hex): Formula {
       return { type: 'Variable', varIdx: toSafeNumber(varIdx) };
     }
   }
+}
+
+function decodeOptionalFormula(encoded: Hex): Formula | undefined {
+  return size(encoded) === 0 ? undefined : decodeFormula(encoded);
 }
 
 function decodeVariableRole(encoded: Hex): VariableRole {
@@ -193,7 +180,7 @@ function decodePayment(encoded: Hex): Payment {
         type: 'ERC20',
         token: decodeERC7930Address(token),
         sender: decodeERC7930Address(sender),
-        amountFormula: decodeFormula(amountFormula),
+        amount: decodeFormula(amountFormula),
         recipientVarIdx: toSafeNumber(recipientVarIdx),
         estimatedDelaySeconds,
       };
