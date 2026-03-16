@@ -1,10 +1,14 @@
 {
   "type": "module",
   "scripts": {
-    "check": "tsgo --noEmit"
+    "check": "tsc --noEmit",
+    "demo": "node src/demo.ts"
   },
-  "dependencies": {
+  "devDependencies": {
+    "@openzeppelin/contracts": "^5.6.1",
     "abitype": "^1.2.3",
-    "viem": "^2.41.2"
+    "signal-exit": "^4.1.0",
+    "typescript": "^5.9.3",
+    "viem": "^2.47.4"
   }
 }

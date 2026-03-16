@@ -1,0 +1,5 @@
+[profile.default]
+src = "contracts"
+
+[lint]
+lint_on_build = false

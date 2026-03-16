@@ -19,8 +19,9 @@ export async function fill(
   ctx: SolverContext,
   order: ResolvedOrder,
   env: VariableEnv,
-): Promise<boolean> {
+) : Promise<Partial<TransactionReceipt[]> | undefined> {
   const dependencies = getDependencies(order);
+  const receipts: Partial<TransactionReceipt[]> = [];
 
   const waitForDependencies = (deps: DependencyNode): Promise<unknown> =>
     Promise.all([
@@ -31,7 +32,7 @@ export async function fill(
   const visitStep = memoize(async (stepId: number) => {
     await waitForDependencies(dependencies.steps[stepId]!);
     await waitForStepLowerBound(ctx, env, order, stepId);
-    await executeStep(ctx, env, order, stepId);
+    receipts[stepId] = await executeStep(ctx, env, order, stepId);
   });
 
   const visitVariable = memoize(async (varIdx: number) => {
@@ -46,10 +47,10 @@ export async function fill(
 
   try {
     await Promise.all(order.steps.map((_, stepId) => visitStep(stepId)));
-    return true;
+    return receipts;
   } catch (error) {
     if (error instanceof AbortOrderError)
-      return false;
+      return undefined;
     throw error;
   }
 }
@@ -59,7 +60,7 @@ async function executeStep(
   env: VariableEnv,
   order: ResolvedOrder,
   stepId: number,
-): Promise<void> {
+): Promise<TransactionReceipt | undefined> {
   const step = order.steps[stepId]!;
   const walletClient = ctx.getWalletClient(step.target.chainId);
   const publicClient = ctx.getPublicClient(step.target.chainId);
@@ -72,6 +73,7 @@ async function executeStep(
     step.target.address,
     callData,
   );
+  let receipt: TransactionReceipt | undefined;
 
   if (!revertData) {
     const txhash = await walletClient.sendTransaction({
@@ -80,7 +82,7 @@ async function executeStep(
       data: callData,
     });
 
-    const receipt = await publicClient.waitForTransactionReceipt({
+    receipt = await publicClient.waitForTransactionReceipt({
       hash: txhash,
       confirmations,
     });
@@ -111,11 +113,13 @@ async function executeStep(
       case 'abort':
         throw new AbortOrderError();
       case 'ignore':
-        return;
+        return receipt;
       default:
         throw new ResolverError();
     }
   }
+
+  return receipt;
 }
 
 async function sleepUntilTimestamp(timestampSeconds: bigint): Promise<void> {

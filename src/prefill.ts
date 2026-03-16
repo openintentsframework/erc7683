@@ -42,11 +42,13 @@ async function validateWorstCaseCompletion(
       evalBound(outputs['block.number']?.upperBound),
     ]);
 
-    const etaBlock = (blockNumber: number) =>
-      now + ctx.getTimeToBlock(step.target.chainId, blockNumber, flows);
+    const etaBlock = async (blockNumber: number) =>
+      now + await ctx.getTimeToBlock(step.target.chainId, blockNumber, flows);
 
-    const etaBlockLower = blockNumberLower ? etaBlock(blockNumberLower - 1) : -Infinity;
-    const etaBlockUpper = blockNumberUpper ? etaBlock(blockNumberUpper) : +Infinity;
+    const [etaBlockLower, etaBlockUpper] = await Promise.all([
+      blockNumberLower ? etaBlock(blockNumberLower - 1) : Promise.resolve(-Infinity),
+      blockNumberUpper ? etaBlock(blockNumberUpper) : Promise.resolve(+Infinity),
+    ]);
 
     return [
       Math.max(timestampLower, etaBlockLower),

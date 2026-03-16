@@ -21,7 +21,7 @@ export interface SolverContext {
   getGasPriceUsd: (chainId: bigint) => bigint;
 
   getConfirmationThreshold: (chainId: bigint, flows: unknown) => ConfirmationThreshold;
-  getTimeToBlock: (chainId: bigint, targetBlockNumber: bigint | number, flows: unknown) => number;
+  getTimeToBlock: (chainId: bigint, targetBlockNumber: bigint | number, flows: unknown) => Promise<number>;
   getWitnessDelay: (kind: string, data: Hex) => number;
 }
 
