@@ -24,14 +24,14 @@ export function prequote(ctx: SolverContext, order: ResolvedOrder): void {
 function checkValidRevertPolicies(order: ResolvedOrder): void {
   const dependencyClosure = getDependencyClosure(order);
 
-  const dropStepIds = new Set(
-    order.steps.flatMap((_, stepId) => isDropStep(order, stepId) ? [stepId] : [])
+  const abortStepIds = new Set(
+    order.steps.flatMap((_, stepId) => isAbortStep(order, stepId) ? [stepId] : [])
   );
 
-  const isDropGated = (stepId: number) =>
-    dependencyClosure.get(stepId)!.isSupersetOf(dropStepIds);
+  const isAbortGated = (stepId: number) =>
+    dependencyClosure.get(stepId)!.isSupersetOf(abortStepIds);
 
-  if (order.steps.some((_, stepId) => isFillStep(order, stepId) && !isDropGated(stepId))) {
+  if (order.steps.some((_, stepId) => isFillStep(order, stepId) && !isAbortGated(stepId))) {
     throw new Error('Invalid RevertPolicy order');
   }
 }
@@ -40,6 +40,6 @@ function isFillStep(order: ResolvedOrder, stepIdx: number): boolean {
   return getStepSpends(order, stepIdx).erc20.length > 0;
 }
 
-function isDropStep(order: ResolvedOrder, stepIdx: number): boolean {
-  return getStepRevertPolicies(order, stepIdx).some(({ policy }) => policy === 'drop');
+function isAbortStep(order: ResolvedOrder, stepIdx: number): boolean {
+  return getStepRevertPolicies(order, stepIdx).some(({ policy }) => policy === 'abort');
 }

@@ -11,8 +11,8 @@ class ResolverError extends Error {
   constructor() { super("resolver error") }
 }
 
-class DropOrderError extends Error {
-  constructor() { super("drop order") }
+class AbortOrderError extends Error {
+  constructor() { super("abort order") }
 }
 
 export async function fill(
@@ -48,7 +48,7 @@ export async function fill(
     await Promise.all(order.steps.map((_, stepId) => visitStep(stepId)));
     return true;
   } catch (error) {
-    if (error instanceof DropOrderError)
+    if (error instanceof AbortOrderError)
       return false;
     throw error;
   }
@@ -108,8 +108,8 @@ async function executeStep(
     )?.policy;
 
     switch (revertPolicy) {
-      case 'drop':
-        throw new DropOrderError();
+      case 'abort':
+        throw new AbortOrderError();
       case 'ignore':
         return;
       default:

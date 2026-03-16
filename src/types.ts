@@ -64,7 +64,7 @@ export interface Attribute_NeedsStep {
 
 export interface Attribute_RevertPolicy {
   type: 'RevertPolicy';
-  policy: 'drop' | 'ignore'; // TODO: 'retry';
+  policy: 'abort' | 'ignore'; // TODO: 'retry';
   expectedReason: Hex;
 }
 

@@ -97,7 +97,7 @@ function decodeAttribute(encoded: Hex): Attribute {
     case 'RevertPolicy': {
       const [policy, expectedReason] = decoded.args;
       switch (policy) {
-        case 'drop':
+        case 'abort':
         case 'ignore':
           return { type: 'RevertPolicy', policy, expectedReason };
         default:
