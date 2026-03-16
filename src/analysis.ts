@@ -12,11 +12,7 @@ export interface Spends {
   gas?: Formula;
 }
 
-export interface Outputs {
-  'block.timestamp'?: OutputBinding;
-  'block.number'?: OutputBinding;
-  'receipt.effectiveGasPrice'?: OutputBinding;
-}
+export type Outputs = Record<string, OutputBinding>;
 
 export interface DependencyNode {
   neededSteps: number[];
@@ -75,9 +71,14 @@ export function getStepInputs(order: ResolvedOrder, stepIdx: number): number[] {
   return [...inputs];
 }
 
-export function getStepRevertPolicies(order: ResolvedOrder, stepIdx: number): Attribute_RevertPolicy[] {
+export function getStepRevertPolicies(
+  order: ResolvedOrder,
+  stepIdx: number,
+  policy?: Attribute_RevertPolicy['policy'],
+): Attribute_RevertPolicy[] {
   return order.steps[stepIdx]!.attributes
-    .filter(attribute => attribute.type === 'RevertPolicy');
+    .filter(attr => attr.type === 'RevertPolicy')
+    .filter(attr => policy === undefined || attr.policy === policy);
 }
 
 export function getStepOutputs(order: ResolvedOrder, stepIdx: number): Outputs {
@@ -100,6 +101,10 @@ export function getStepOutputs(order: ResolvedOrder, stepIdx: number): Outputs {
       default:
         throw new Error(`Unsupported Outputs field '${attribute.output.field}'`);
     }
+  }
+
+  if (Object.keys(outputs).length > 0 && getStepRevertPolicies(order, stepIdx, 'ignore').length > 0) {
+    throw new Error(`Invalid Outputs: steps with outputs may not use ignore revert policy`);
   }
 
   return outputs;

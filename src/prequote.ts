@@ -41,5 +41,5 @@ function isFillStep(order: ResolvedOrder, stepIdx: number): boolean {
 }
 
 function isAbortStep(order: ResolvedOrder, stepIdx: number): boolean {
-  return getStepRevertPolicies(order, stepIdx).some(({ policy }) => policy === 'abort');
+  return getStepRevertPolicies(order, stepIdx, 'abort').length > 0;
 }
