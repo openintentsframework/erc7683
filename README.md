@@ -1,4 +1,6 @@
-# ERC-7683
+# ERC-7683 Redux Demo
+
+[ERC-7683 Redux: Programmable Fillers](https://ethereum-magicians.org/t/erc-7683-redux-programmable-fillers/27674)
 
 ## Order
 
