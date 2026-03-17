@@ -26,21 +26,21 @@ export function decodeAbiWrappedValue(encoded: Hex): AbiEncodedValue {
     const encoding = slice(encoded, size(DYN_PREFIX));
     return { type: 'Dynamic', encoding };
   } else {
-    // Static: format is [32-byte size][encoding][32-byte zero padding]
-    const lengthHex = slice(encoded, 0, 32);
-    const length = hexToNumber(lengthHex);
-    const expectedLength = length + 64;
+    // Static: format is [32-byte tail offset][static encoding][32-byte zero tail]
+    const offsetHex = slice(encoded, 0, 32);
+    const offset = hexToNumber(offsetHex);
+    const expectedSize = offset + 32;
 
-    if (size(encoded) !== expectedLength) {
+    if (size(encoded) !== expectedSize) {
       throw new Error('Invalid static argument length');
     }
 
-    const padding = slice(encoded, expectedLength - 32, expectedLength);
+    const padding = slice(encoded, expectedSize - 32, expectedSize);
     if (padding !== ZERO) {
       throw new Error('Missing static argument end marker');
     }
 
-    const encoding = slice(encoded, 32, expectedLength - 32);
+    const encoding = slice(encoded, 32, expectedSize - 32);
     return { type: 'Static', encoding };
   }
 }
