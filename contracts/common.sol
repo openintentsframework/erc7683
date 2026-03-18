@@ -164,3 +164,17 @@ library VariableRole {
         return abi.encodeCall(IVariableRole.QueryEvents, (emitter, topicMatch, topic0, topic1, topic2, topic3, blockNumber));
     }
 }
+
+library Argument {
+    function Variable(uint256 varIdx) internal pure returns (bytes memory) {
+        return abi.encode(varIdx);
+    }
+
+    function Uint256(uint256 value) internal pure returns (bytes memory) {
+        return abi.encode("", value);
+    }
+
+    function String(string memory value) internal pure returns (bytes memory) {
+        return abi.encode("", value);
+    }
+}

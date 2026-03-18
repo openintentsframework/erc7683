@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {InteroperableAddress} from "@openzeppelin/contracts/utils/draft-InteroperableAddress.sol";
-import {IResolver, Step, Attribute, VariableRole, Formula} from "./common.sol";
+import {IResolver, Step, Attribute, VariableRole, Formula, Argument} from "./common.sol";
 
 contract BasicResolver is IResolver {
     uint256 immutable chainId;
@@ -23,8 +23,8 @@ contract BasicResolver is IResolver {
         variables[step0_timestamp] = VariableRole.ExecutionOutput();
 
         bytes[] memory step0_arguments = new bytes[](2);
-        step0_arguments[0] = abi.encode("", "hello");
-        step0_arguments[1] = abi.encode("", 42);
+        step0_arguments[0] = Argument.String("hello");
+        step0_arguments[1] = Argument.Uint256(42);
 
         bytes[] memory step0_attributes = new bytes[](1);
         step0_attributes[0] = Attribute.Outputs("block.timestamp", step0_timestamp, "", "");
@@ -39,8 +39,8 @@ contract BasicResolver is IResolver {
         );
 
         bytes[] memory step1_arguments = new bytes[](2);
-        step1_arguments[0] = abi.encode("", "hello");
-        step1_arguments[1] = abi.encode(step0_timestamp);
+        step1_arguments[0] = Argument.String("hello");
+        step1_arguments[1] = Argument.Variable(step0_timestamp);
 
         bytes[] memory step1_attributes = new bytes[](1);
         step1_attributes[0] = Attribute.SpendsGas(Formula.Constant(100_000));
