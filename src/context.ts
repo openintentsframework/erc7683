@@ -17,12 +17,15 @@ export interface SolverContext {
   fillerAddress: Address;
   isWhitelisted: (account: Account, assumption: string) => boolean;
   getWitnessResolver: (kind: string) => WitnessResolver | undefined;
+
   getTokenPriceUsd: (token: Account) => bigint;
   getGasPriceUsd: (chainId: bigint) => bigint;
 
   getConfirmationThreshold: (chainId: bigint, flows: unknown) => ConfirmationThreshold;
   getTimeToBlock: (chainId: bigint, targetBlockNumber: bigint | number, flows: unknown) => Promise<number>;
   getWitnessDelay: (kind: string, data: Hex) => number;
+
+
 }
 
 interface WitnessResolver {

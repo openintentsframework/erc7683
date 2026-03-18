@@ -66,10 +66,10 @@ async function validateWorstCaseCompletion(
   const visitStep = memoize((stepIdx: number): number => {
     const step = order.steps[stepIdx]!;
     const depsReadyTime = getDepsReadyTime(dependencies.steps[stepIdx]!);
-    const confirmationThreshold = ctx.getConfirmationThreshold(step.target.chainId, flows);
 
     const [lowerBound, upperBound] = stepBounds[stepIdx]!;
     const executionTime = Math.max(lowerBound, depsReadyTime);
+    const confirmationThreshold = ctx.getConfirmationThreshold(step.target.chainId, flows);
     const completionTime = executionTime + confirmationThreshold.etaFromBroadcast;
 
     if (completionTime > upperBound)

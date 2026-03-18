@@ -26,6 +26,9 @@ const hash = await walletClient.deployContract({
 });
 const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
+console.log('Setup');
+console.log(`  BasicResolver deployed at ${receipt.contractAddress}`);
+
 assert(receipt.contractAddress, 'BasicResolver deployment failed');
 
 const ctx: SolverContext = {
@@ -56,11 +59,8 @@ const receipts = await process(
     address: receipt.contractAddress,
     chainId: BigInt(chainId),
   },
-  new Uint8Array()
+  new Uint8Array() // empty payload
 );
-
-console.log('Setup');
-console.log(`  BasicResolver deployed at ${receipt.contractAddress}`);
 
 for (const [stepId, receipt] of receipts?.entries() ?? []) {
   if (!receipt) continue;
