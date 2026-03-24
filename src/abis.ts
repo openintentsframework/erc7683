@@ -37,5 +37,7 @@ export const variableRoleAbi = parseAbi([
   'function QueryEvents(bytes emitter, bytes1 topicMatch, bytes32 topic0, bytes32 topic1, bytes32 topic2, bytes32 topic3, uint256 blockNumber) external',
 ]);
 
-export const ethLogStruct =
-  'struct EthLog { address emitter; bytes32[] topics; bytes data; uint256 blockNumber; bytes32 transactionHash; uint256 transactionIndex; bytes32 blockHash; uint256 logIndex; }';
+export const ethLogAbi = parseAbi([
+  'function _(EthLog[] memory) external',
+  'struct EthLog { address emitter; bytes32[] topics; bytes data; uint256 blockNumber; bytes32 transactionHash; uint256 transactionIndex; bytes32 blockHash; uint256 logIndex; }',
+])[0].inputs;

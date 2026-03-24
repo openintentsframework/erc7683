@@ -1,0 +1,38 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
+
+import {InteroperableAddress} from "@openzeppelin/contracts/utils/draft-InteroperableAddress.sol";
+import {IResolver, Step, Argument} from "../ERC7683.sol";
+import {BasicTarget} from "../common.sol";
+
+contract Resolver is IResolver {
+    uint256 immutable chainId;
+    address immutable target;
+
+    constructor() {
+        chainId = block.chainid;
+        target = address(new BasicTarget());
+    }
+
+    function resolve(bytes calldata payload) external view returns (ResolvedOrder memory order) {
+        require(payload.length == 0);
+
+        order.variables = new bytes[](0);
+        order.assumptions = new Assumption[](0);
+        order.payments = new bytes[](0);
+
+        order.steps = new bytes[](1);
+
+        bytes[] memory step0_arguments = new bytes[](2);
+        step0_arguments[0] = Argument.String("hello");
+        step0_arguments[1] = Argument.Uint256(42);
+
+        order.steps[0] = Step.Call(
+            InteroperableAddress.formatEvmV1(chainId, target),
+            BasicTarget.run.selector,
+            step0_arguments,
+            new bytes[](0),
+            new bytes[](0)
+        );
+    }
+}

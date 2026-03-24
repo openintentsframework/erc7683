@@ -2,9 +2,10 @@
 pragma solidity ^0.8.28;
 
 import {InteroperableAddress} from "@openzeppelin/contracts/utils/draft-InteroperableAddress.sol";
-import {IResolver, Step, Attribute, VariableRole, Formula, Argument} from "./common.sol";
+import {IResolver, Step, Attribute, VariableRole, Formula, Argument} from "../ERC7683.sol";
+import {BasicTarget} from "../common.sol";
 
-contract BasicResolver is IResolver {
+contract Resolver is IResolver {
     uint256 immutable chainId;
     address immutable target;
 
@@ -56,8 +57,4 @@ contract BasicResolver is IResolver {
         order.assumptions = new Assumption[](0);
         order.payments = new bytes[](0);
     }
-}
-
-contract BasicTarget {
-    function run(string calldata, uint256) external pure {}
 }

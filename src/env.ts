@@ -1,8 +1,8 @@
-import { concat, decodeAbiParameters, encodeAbiParameters, formatLog, numberToHex, parseAbiParameters, size, type Hex, type Log } from 'viem';
+import { concat, decodeAbiParameters, encodeAbiParameters, formatLog, numberToHex, size, type Hex, type Log } from 'viem';
 import type { Account, Argument, Formula, VariableRole, VariableRole_QueryEvents } from './types.ts';
 import type { SolverContext } from './context.ts';
 import { abiEncode, decodeAbiWrappedValue, type AbiEncodedValue } from './abi-wrap.ts';
-import { ethLogStruct } from './abis.ts';
+import { ethLogAbi } from './abis.ts';
 
 // Assumes resolver does not create dependency cycles between variables.
 export class VariableEnv {
@@ -169,7 +169,7 @@ async function envGetLogs(
   });
 
   return decodeAbiWrappedValue(
-    encodeAbiParameters(parseAbiParameters(['EthLog[]', ethLogStruct]), [decodedLogs]),
+    encodeAbiParameters(ethLogAbi, [decodedLogs]),
   );
 }
 
