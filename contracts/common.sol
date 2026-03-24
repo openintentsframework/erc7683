@@ -9,4 +9,8 @@ contract BasicTarget {
     function checkMagic(uint256 value) external view {
         require(value == magic, "wrong magic");
     }
+
+    function checkTimestamp(uint256 timestamp) external view {
+        require(block.timestamp >= timestamp, "too early");
+    }
 }

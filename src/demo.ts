@@ -133,3 +133,5 @@ await run('ExecutionOutput', new Uint8Array());
 
 await run('Query', new Uint8Array());
 
+await run('TimestampLowerBound', new Uint8Array());
+
