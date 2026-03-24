@@ -5,12 +5,12 @@ import {InteroperableAddress} from "@openzeppelin/contracts/utils/draft-Interope
 import {IResolver, Step, Argument} from "../ERC7683.sol";
 import {BasicTarget} from "../common.sol";
 
+// A minimal resolver with a single step: calls BasicTarget.run("hello", 42) with no
+// variables, attributes, or payments.
 contract Resolver is IResolver {
-    uint256 immutable chainId;
     address immutable target;
 
     constructor() {
-        chainId = block.chainid;
         target = address(new BasicTarget());
     }
 
@@ -28,7 +28,7 @@ contract Resolver is IResolver {
         step0_arguments[1] = Argument.Uint256(42);
 
         order.steps[0] = Step.Call(
-            InteroperableAddress.formatEvmV1(chainId, target),
+            InteroperableAddress.formatEvmV1(block.chainid, target),
             BasicTarget.run.selector,
             step0_arguments,
             new bytes[](0),

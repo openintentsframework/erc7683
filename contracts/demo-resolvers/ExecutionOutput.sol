@@ -5,22 +5,23 @@ import {InteroperableAddress} from "@openzeppelin/contracts/utils/draft-Interope
 import {IResolver, Step, Attribute, VariableRole, Formula, Argument} from "../ERC7683.sol";
 import {BasicTarget} from "../common.sol";
 
+// Two-step resolver that demonstrates variables and execution outputs. Step 0 calls
+// BasicTarget.run("hello", 42) and captures block.timestamp as a variable. Step 1
+// calls the same function but passes the captured timestamp as the second argument.
 contract Resolver is IResolver {
-    uint256 immutable chainId;
     address immutable target;
 
     constructor() {
-        chainId = block.chainid;
         target = address(new BasicTarget());
     }
 
     function resolve(bytes calldata payload) external view returns (ResolvedOrder memory order) {
         require(payload.length == 0);
 
-        uint256 freeVar = 0;
-        uint256 step0_timestamp = freeVar++;
+        uint256 varCount = 0;
+        uint256 step0_timestamp = varCount++;
 
-        bytes[] memory variables = new bytes[](freeVar);
+        bytes[] memory variables = new bytes[](varCount);
         variables[step0_timestamp] = VariableRole.ExecutionOutput();
 
         bytes[] memory step0_arguments = new bytes[](2);
@@ -32,7 +33,7 @@ contract Resolver is IResolver {
 
         order.steps = new bytes[](2);
         order.steps[0] = Step.Call(
-            InteroperableAddress.formatEvmV1(chainId, target),
+            InteroperableAddress.formatEvmV1(block.chainid, target),
             BasicTarget.run.selector,
             step0_arguments,
             step0_attributes,
@@ -47,7 +48,7 @@ contract Resolver is IResolver {
         step1_attributes[0] = Attribute.SpendsGas(Formula.Constant(100_000));
 
         order.steps[1] = Step.Call(
-            InteroperableAddress.formatEvmV1(chainId, target),
+            InteroperableAddress.formatEvmV1(block.chainid, target),
             BasicTarget.run.selector,
             step1_arguments,
             step1_attributes,

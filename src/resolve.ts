@@ -140,7 +140,7 @@ function decodeVariableRole(encoded: Hex): VariableRole {
     }
     case 'Query': {
       const [target, selector, arguments_, blockNumber] = decoded.args;
-      return { type: 'Query', target: decodeERC7930Address(target), selector, arguments: arguments_.map(decodeArgument), blockNumber };
+      return { type: 'Query', target: decodeERC7930Address(target), selector, arguments: arguments_.map(decodeArgument), blockNumber: blockNumber || undefined };
     }
     case 'QueryEvents': {
       const [emitter, topicMatch, topic0, topic1, topic2, topic3, blockNumber] = decoded.args;
@@ -151,7 +151,7 @@ function decodeVariableRole(encoded: Hex): VariableRole {
         topic1,
         topic2,
         topic3,
-        blockNumber,
+        blockNumber: blockNumber || undefined,
       };
 
       const mask = hexToNumber(topicMatch);

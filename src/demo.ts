@@ -129,5 +129,7 @@ async function run(sourceFile: string, payload: Uint8Array) {
 
 await run('SingleStep', new Uint8Array());
 
-await run('TimestampOutput', new Uint8Array());
+await run('ExecutionOutput', new Uint8Array());
+
+await run('Query', new Uint8Array());
 
