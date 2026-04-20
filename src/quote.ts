@@ -83,14 +83,14 @@ function collectFlowFormulas(order: ResolvedOrder): AssetFlow<Formula>[] {
 
   for (const [stepIdx, step] of order.steps.entries()) {
     const spends = getStepSpends(order, stepIdx);
-    const gasFlow: GasFlow<Formula> = {
+
+    flows.push({
       chainId: step.target.chainId,
       token: 'gas',
+      amount: spends.gas,
       step,
       sign: -1n,
-    };
-
-    flows.push(gasFlow);
+    });
 
     for (const attribute of spends.erc20) {
       flows.push({
@@ -99,11 +99,6 @@ function collectFlowFormulas(order: ResolvedOrder): AssetFlow<Formula>[] {
         amount: attribute.amount,
         sign: -1n,
       });
-    }
-
-    const gasEstimate = spends.gas;
-    if (gasEstimate) {
-      gasFlow.amount = gasEstimate;
     }
 
     for (const payment of step.payments) {
