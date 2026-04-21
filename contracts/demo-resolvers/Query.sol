@@ -34,7 +34,7 @@ contract Resolver is IResolver {
             resolverAddr,
             this.wrappedMagic.selector,
             new bytes[](0),
-            0
+            type(uint256).max
         );
 
         bytes[] memory step0_arguments = new bytes[](1);

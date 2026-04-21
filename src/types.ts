@@ -129,7 +129,7 @@ export interface VariableRole_Query {
   target: Account;
   selector: Hex; // bytes4
   arguments: Argument[];
-  blockNumber: bigint;
+  blockNumber?: bigint;
 }
 
 export interface VariableRole_QueryEvents {
@@ -139,7 +139,7 @@ export interface VariableRole_QueryEvents {
   topic1?: Hex;
   topic2?: Hex;
   topic3?: Hex;
-  blockNumber: bigint;
+  blockNumber?: bigint;
 }
 
 export interface Assumption {

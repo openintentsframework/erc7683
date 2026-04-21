@@ -52,8 +52,8 @@ A `Witness` variable is some offchain computation, a function of order data and 
 
 #### Variable: Query
 
-A `Query` variable is computed by an offchain call to a target contract, specified by a function selector, list of arguments, and block number.
+A `Query` variable is computed by an offchain call to a target contract, specified by a function selector, list of arguments, and block number. A block number of `uint256(-1)` indicates the latest block.
 
 #### Variable: Query Events
 
-A `QueryEvents` variable is computed by querying logs from a specified emitter and block number, optionally filtered by topics.
+A `QueryEvents` variable is computed by querying logs from a specified emitter and block number, optionally filtered by topics. A block number of `uint256(-1)` indicates the latest block.

@@ -4,6 +4,8 @@ import type { Attribute, ResolvedOrder, Account, Argument, Formula, Payment, Ste
 import { resolverAbi, attributeAbi, formulaAbi, paymentAbi, stepAbi, variableRoleAbi } from './abis.ts';
 import { decodeAbiWrappedValue } from './abi-wrap.ts';
 
+const UINT256_MAX = (1n << 256n) - 1n;
+
 export async function resolve(client: PublicClient, resolver: Address, payload: Uint8Array): Promise<ResolvedOrder> {
   const result = await client.readContract({
     address: resolver,
@@ -140,7 +142,13 @@ function decodeVariableRole(encoded: Hex): VariableRole {
     }
     case 'Query': {
       const [target, selector, arguments_, blockNumber] = decoded.args;
-      return { type: 'Query', target: decodeERC7930Address(target), selector, arguments: arguments_.map(decodeArgument), blockNumber: blockNumber || undefined };
+      return {
+        type: 'Query',
+        target: decodeERC7930Address(target),
+        selector,
+        arguments: arguments_.map(decodeArgument),
+        blockNumber: decodeBlockNumber(blockNumber),
+      };
     }
     case 'QueryEvents': {
       const [emitter, topicMatch, topic0, topic1, topic2, topic3, blockNumber] = decoded.args;
@@ -151,7 +159,7 @@ function decodeVariableRole(encoded: Hex): VariableRole {
         topic1,
         topic2,
         topic3,
-        blockNumber: blockNumber || undefined,
+        blockNumber: decodeBlockNumber(blockNumber),
       };
 
       const mask = hexToNumber(topicMatch);
@@ -167,6 +175,10 @@ function decodeVariableRole(encoded: Hex): VariableRole {
       return { type: decoded.functionName };
     }
   }
+}
+
+function decodeBlockNumber(blockNumber: bigint): bigint | undefined {
+  return blockNumber === UINT256_MAX ? undefined : blockNumber;
 }
 
 function decodePayment(encoded: Hex): Payment {

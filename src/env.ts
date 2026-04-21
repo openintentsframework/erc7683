@@ -142,13 +142,14 @@ async function envGetLogs(
   spec: VariableRole_QueryEvents,
 ): Promise<AbiEncodedValue> {
   const client = ctx.getPublicClient(spec.emitter.chainId);
+  const blockNumber = spec.blockNumber === undefined ? 'latest' : numberToHex(spec.blockNumber);
 
   const rpcLogs = await client.request({
     method: 'eth_getLogs',
     params: [{
       address: spec.emitter.address,
-      fromBlock: numberToHex(spec.blockNumber),
-      toBlock: numberToHex(spec.blockNumber),
+      fromBlock: blockNumber,
+      toBlock: blockNumber,
       topics: [
         spec.topic0 ?? null,
         spec.topic1 ?? null,
