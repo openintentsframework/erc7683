@@ -30,7 +30,7 @@ export const paymentAbi = parseAbi([
 export const variableRoleAbi = parseAbi([
   'function PaymentRecipient(uint256 chainId) external',
   'function PaymentChain() external',
-  'function Pricing() external', // rename Decision?
+  'function Pricing() external',
   'function ExecutionOutput() external',
   'function Witness(string kind, bytes data, uint256[] variables) external',
   'function Query(bytes target, bytes4 selector, bytes[] arguments, uint256 blockNumber) external',
