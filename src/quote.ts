@@ -1,16 +1,16 @@
 import type { Address } from 'viem';
 import { getStepSpends } from './analysis.ts';
 import type { SolverContext } from './context.ts';
-import { VariableEnv, envSimulateCall, envEval } from './env.ts';
+import { envSimulateCall, envEval, type VariableEnv } from './env.ts';
 import type { Formula, ResolvedOrder, Step } from './types.ts';
 
 interface QuoteResult {
-  env: VariableEnv; // resolved variables, passed to fill
   flows: Required<AssetFlow<bigint>>[];
 }
 
 export async function quote(
   ctx: SolverContext,
+  env: VariableEnv,
   order: ResolvedOrder,
 ): Promise<QuoteResult> {
   const flowFormulas = collectFlowFormulas(order);
@@ -23,7 +23,6 @@ export async function quote(
     throw new Error('Pricing variables not supported');
   }
 
-  const env = new VariableEnv(ctx, order.variables);
   const flowAmounts = await computeFlowAmounts(ctx, env, flowFormulas);
   const pnlUsd = computePnLUsd(ctx, flowAmounts);
 
@@ -31,7 +30,7 @@ export async function quote(
     throw new Error('Negative PnL');
   }
 
-  return { env, flows: flowAmounts };
+  return { flows: flowAmounts };
 }
 
 function collectPricingVars(order: ResolvedOrder): number[] {

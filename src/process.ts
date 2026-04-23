@@ -6,6 +6,7 @@ import { prequote } from './prequote.ts';
 import { prefill } from './prefill.ts';
 import { quote } from './quote.ts';
 import { fill } from './fill.ts';
+import { VariableEnv } from './env.ts';
 
 export async function process(
   ctx: SolverContext,
@@ -20,7 +21,8 @@ export async function process(
 
   prequote(ctx, order);
 
-  const { env, flows } = await quote(ctx, order);
+  const env = new VariableEnv(ctx, order.variables);
+  const { flows } = await quote(ctx, env, order);
 
   await prefill(ctx, order, env, flows);
 
