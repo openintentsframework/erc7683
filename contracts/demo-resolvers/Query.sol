@@ -45,7 +45,6 @@ contract Resolver is IResolver {
             targetAddr,
             BasicTarget.checkMagic.selector,
             step0_arguments,
-            new bytes[](0),
             new bytes[](0)
         );
         order.variables = variables;

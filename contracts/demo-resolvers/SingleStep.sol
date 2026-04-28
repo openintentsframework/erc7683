@@ -6,7 +6,7 @@ import {IResolver, Step, Argument} from "../ERC7683.sol";
 import {BasicTarget} from "../common.sol";
 
 // A minimal resolver with a single step: calls BasicTarget.run("hello", 42) with no
-// variables, attributes, or payments.
+// variables or attributes.
 contract Resolver is IResolver {
     address immutable target;
 
@@ -31,7 +31,6 @@ contract Resolver is IResolver {
             InteroperableAddress.formatEvmV1(block.chainid, target),
             BasicTarget.run.selector,
             step0_arguments,
-            new bytes[](0),
             new bytes[](0)
         );
     }

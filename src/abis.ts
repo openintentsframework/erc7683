@@ -7,7 +7,7 @@ export const resolverAbi = parseAbi([
 ]);
 
 export const stepAbi = parseAbi([
-  'function Call(bytes target, bytes4 selector, bytes[] arguments, bytes[] attributes, bytes[] payments) external',
+  'function Call(bytes target, bytes4 selector, bytes[] arguments, bytes[] attributes) external',
 ]);
 
 export const attributeAbi = parseAbi([
@@ -24,7 +24,7 @@ export const formulaAbi = parseAbi([
 ]);
 
 export const paymentAbi = parseAbi([
-  'function ERC20(bytes token, bytes sender, bytes amountFormula, uint256 recipientVarIdx, uint256 estimatedDelaySeconds) external',
+  'function ERC20(bytes token, bytes sender, bytes amountFormula, uint256 recipientVarIdx, uint256 onStepIdx, uint256 estimatedDelaySeconds) external',
 ]);
 
 export const variableRoleAbi = parseAbi([

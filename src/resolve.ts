@@ -34,7 +34,7 @@ function decodeStep(data: Hex): Step {
 
   switch (decoded.functionName) {
     case 'Call': {
-      const [target, selector, arguments_, attributes, payments] =
+      const [target, selector, arguments_, attributes] =
         decoded.args;
       return {
         type: 'Call',
@@ -42,7 +42,6 @@ function decodeStep(data: Hex): Step {
         selector,
         arguments: arguments_.map(decodeArgument),
         attributes: attributes.map(decodeAttribute),
-        payments: payments.map(decodePayment),
       };
     }
   }
@@ -180,7 +179,7 @@ function decodePayment(encoded: Hex): Payment {
 
   switch (decoded.functionName) {
     case 'ERC20': {
-      const [token, sender, amountFormula, recipientVarIdx, estimatedDelaySeconds] =
+      const [token, sender, amountFormula, recipientVarIdx, onStepIdx, estimatedDelaySeconds] =
         decoded.args;
       return {
         type: 'ERC20',
@@ -188,6 +187,7 @@ function decodePayment(encoded: Hex): Payment {
         sender: decodeERC7930Address(sender),
         amount: decodeFormula(amountFormula),
         recipientVarIdx: toSafeNumber(recipientVarIdx),
+        onStepIdx: toSafeNumber(onStepIdx),
         estimatedDelaySeconds,
       };
     }

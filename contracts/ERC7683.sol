@@ -22,8 +22,7 @@ interface IStep {
         bytes calldata target,
         bytes4 selector,
         bytes[] calldata arguments,
-        bytes[] calldata attributes,
-        bytes[] calldata payments
+        bytes[] calldata attributes
     ) external;
 }
 
@@ -32,10 +31,9 @@ library Step {
         bytes memory target,
         bytes4 selector,
         bytes[] memory arguments,
-        bytes[] memory attributes,
-        bytes[] memory payments
+        bytes[] memory attributes
     ) internal pure returns (bytes memory) {
-        return abi.encodeCall(IStep.Call, (target, selector, arguments, attributes, payments));
+        return abi.encodeCall(IStep.Call, (target, selector, arguments, attributes));
     }
 }
 
@@ -90,6 +88,7 @@ interface IPayment {
         bytes memory sender,
         bytes memory amountFormula,
         uint256 recipientVarIdx,
+        uint256 onStepIdx,
         uint256 estimatedDelaySeconds
     ) external;
 }
@@ -100,11 +99,12 @@ library Payment {
         bytes memory sender,
         bytes memory amountFormula,
         uint256 recipientVarIdx,
+        uint256 onStepIdx,
         uint256 estimatedDelaySeconds
     ) internal pure returns (bytes memory) {
         return abi.encodeCall(
             IPayment.ERC20,
-            (token, sender, amountFormula, recipientVarIdx, estimatedDelaySeconds)
+            (token, sender, amountFormula, recipientVarIdx, onStepIdx, estimatedDelaySeconds)
         );
     }
 }

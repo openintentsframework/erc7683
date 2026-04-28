@@ -22,7 +22,6 @@ export interface Step_Call {
   selector: Hex; // bytes4
   arguments: Argument[];
   attributes: Attribute[];
-  payments: Payment[];
 }
 
 export type Attribute =
@@ -84,6 +83,7 @@ export interface Payment_ERC20 {
   sender: Account;
   amount: Formula;
   recipientVarIdx: number;
+  onStepIdx: number;
   estimatedDelaySeconds: bigint;
 }
 

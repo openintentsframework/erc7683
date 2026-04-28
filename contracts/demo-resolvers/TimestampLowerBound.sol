@@ -43,8 +43,7 @@ contract Resolver is IResolver {
             InteroperableAddress.formatEvmV1(block.chainid, target),
             BasicTarget.checkTimestamp.selector,
             step0_arguments,
-            step0_attributes,
-            new bytes[](0)
+            step0_attributes
         );
         order.variables = variables;
         order.assumptions = new Assumption[](0);

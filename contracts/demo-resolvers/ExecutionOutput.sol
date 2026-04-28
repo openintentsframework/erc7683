@@ -36,8 +36,7 @@ contract Resolver is IResolver {
             InteroperableAddress.formatEvmV1(block.chainid, target),
             BasicTarget.run.selector,
             step0_arguments,
-            step0_attributes,
-            new bytes[](0)
+            step0_attributes
         );
 
         bytes[] memory step1_arguments = new bytes[](2);
@@ -51,8 +50,7 @@ contract Resolver is IResolver {
             InteroperableAddress.formatEvmV1(block.chainid, target),
             BasicTarget.run.selector,
             step1_arguments,
-            step1_attributes,
-            new bytes[](0)
+            step1_attributes
         );
         order.variables = variables;
         order.assumptions = new Assumption[](0);

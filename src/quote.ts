@@ -100,19 +100,6 @@ function collectFlowFormulas(order: ResolvedOrder): AssetFlow<Formula>[] {
       });
     }
 
-    for (const payment of step.payments) {
-      if (payment.type === 'ERC20') {
-        // TODO: handle delays: tolerance limits, interest?
-        if (payment.estimatedDelaySeconds !== 0n) throw new Error('Delayed payment not supported');
-
-        flows.push({
-          chainId: payment.token.chainId,
-          token: payment.token.address,
-          amount: payment.amount,
-          sign: 1n,
-        });
-      }
-    }
   }
 
   for (const payment of order.payments) {
