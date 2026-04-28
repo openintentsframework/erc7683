@@ -61,13 +61,13 @@ function decodeAttribute(encoded: Hex): Attribute {
 
   switch (decoded.functionName) {
     case 'SpendsERC20': {
-      const [token, amountFormula, spender, receiver] = decoded.args;
+      const [token, amountFormula, spender, recipient] = decoded.args;
       return {
         type: 'SpendsERC20',
         token: decodeERC7930Address(token),
         amount: decodeFormula(amountFormula),
         spender: decodeERC7930Address(spender),
-        receiver: decodeERC7930Address(receiver),
+        recipient: decodeERC7930Address(recipient),
       };
     }
     case 'SpendsGas': {

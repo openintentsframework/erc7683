@@ -44,7 +44,7 @@ export interface Attribute_SpendsERC20 {
   token: Account;
   amount: Formula;
   spender: Account;
-  receiver: Account;
+  recipient: Account;
 }
 
 export interface Attribute_SpendsGas {

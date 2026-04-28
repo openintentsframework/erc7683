@@ -40,7 +40,7 @@ library Step {
 }
 
 interface IAttribute {
-    function SpendsERC20(bytes memory token, bytes memory amountFormula, bytes memory spender, bytes memory receiver) external;
+    function SpendsERC20(bytes memory token, bytes memory amountFormula, bytes memory spender, bytes memory recipient) external;
     function SpendsGas(bytes memory amountFormula) external;
     function Outputs(string memory field, uint256 varIdx, bytes memory lowerBound, bytes memory upperBound) external;
     function NeedsStep(uint256 stepIdx) external;
@@ -48,8 +48,8 @@ interface IAttribute {
 }
 
 library Attribute {
-    function SpendsERC20(bytes memory token, bytes memory amountFormula, bytes memory spender, bytes memory receiver) internal pure returns (bytes memory) {
-        return abi.encodeCall(IAttribute.SpendsERC20, (token, amountFormula, spender, receiver));
+    function SpendsERC20(bytes memory token, bytes memory amountFormula, bytes memory spender, bytes memory recipient) internal pure returns (bytes memory) {
+        return abi.encodeCall(IAttribute.SpendsERC20, (token, amountFormula, spender, recipient));
     }
 
     function SpendsGas(bytes memory amountFormula) internal pure returns (bytes memory) {
