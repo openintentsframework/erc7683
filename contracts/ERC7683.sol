@@ -110,7 +110,7 @@ library Payment {
 }
 
 interface IVariableRole {
-    function PaymentRecipient(uint256 chainId) external;
+    function PaymentRecipient() external;
     function PaymentChain() external;
     function Pricing() external;
     function ExecutionOutput() external;
@@ -128,8 +128,8 @@ interface IVariableRole {
 }
 
 library VariableRole {
-    function PaymentRecipient(uint256 chainId) internal pure returns (bytes memory) {
-        return abi.encodeCall(IVariableRole.PaymentRecipient, (chainId));
+    function PaymentRecipient() internal pure returns (bytes memory) {
+        return abi.encodeCall(IVariableRole.PaymentRecipient, ());
     }
 
     function PaymentChain() internal pure returns (bytes memory) {

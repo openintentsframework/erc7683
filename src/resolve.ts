@@ -132,10 +132,6 @@ function decodeVariableRole(encoded: Hex): VariableRole {
   const decoded = decodeFunctionData({ abi: variableRoleAbi, data: encoded });
 
   switch (decoded.functionName) {
-    case 'PaymentRecipient': {
-      const [chainId] = decoded.args;
-      return { type: 'PaymentRecipient', chainId };
-    }
     case 'Witness': {
       const [kind, data, variables] = decoded.args;
       return { type: 'Witness', kind, data, variables: variables.map(toSafeNumber) };

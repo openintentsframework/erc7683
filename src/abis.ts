@@ -28,7 +28,7 @@ export const paymentAbi = parseAbi([
 ]);
 
 export const variableRoleAbi = parseAbi([
-  'function PaymentRecipient(uint256 chainId) external',
+  'function PaymentRecipient() external',
   'function PaymentChain() external',
   'function Pricing() external',
   'function ExecutionOutput() external',

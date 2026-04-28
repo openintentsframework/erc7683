@@ -20,7 +20,7 @@ const context: SolverContext = {
   getPublicClient: chainId => chains[Number(chainId) - 1]!.publicClient,
   getWalletClient: chainId => chains[Number(chainId) - 1]!.walletClient,
   paymentChain: 1n,
-  paymentRecipient: () => account,
+  paymentRecipient: account,
   fillerAddress: account,
   isWhitelisted: () => false,
   getWitnessResolver: () => undefined,

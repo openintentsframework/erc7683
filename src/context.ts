@@ -13,7 +13,7 @@ export interface SolverContext {
   getPublicClient: (chainId: bigint) => PublicClient;
   getWalletClient: (chainId: bigint) => WalletClient;
   paymentChain: bigint;
-  paymentRecipient: (chainId: bigint) => Address;
+  paymentRecipient: Address;
   fillerAddress: Address;
   isWhitelisted: (account: Account, assumption: string) => boolean;
   getWitnessResolver: (kind: string) => WitnessResolver | undefined;

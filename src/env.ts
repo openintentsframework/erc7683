@@ -51,7 +51,7 @@ export class VariableEnv {
       }
 
       case 'PaymentRecipient': {
-        return abiEncode(this.ctx.paymentRecipient(role.chainId), 'address');
+        return abiEncode(this.ctx.paymentRecipient, 'address');
       }
 
       case 'Query': {

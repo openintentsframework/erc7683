@@ -102,7 +102,6 @@ export type VariableRole =
 
 export interface VariableRole_PaymentRecipient {
   type: 'PaymentRecipient';
-  chainId: bigint;
 }
 
 export interface VariableRole_PaymentChain {
