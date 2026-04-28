@@ -24,7 +24,7 @@ export async function quote(
   }
 
   const flowAmounts = await computeFlowAmounts(ctx, env, flowFormulas);
-  const pnlUsd = computePnLUsd(ctx, flowAmounts);
+  const pnlUsd = await computePnLUsd(ctx, flowAmounts);
 
   if (pnlUsd < 0n) {
     throw new Error('Negative PnL');
@@ -43,16 +43,16 @@ function collectPricingVars(order: ResolvedOrder): number[] {
   return pricingVars;
 }
 
-function computePnLUsd(
+async function computePnLUsd(
   ctx: SolverContext,
   flows: Required<AssetFlow<bigint>>[],
-): bigint {
+): Promise<bigint> {
   let pnl = 0n;
 
   for (const flow of flows) {
     const price = flow.token === 'gas'
-      ? ctx.getGasPriceUsd(flow.chainId)
-      : ctx.getTokenPriceUsd({ address: flow.token, chainId: flow.chainId });
+      ? await ctx.getGasPriceUsd(flow.chainId)
+      : await ctx.getTokenPriceUsd({ address: flow.token, chainId: flow.chainId });
 
     pnl += flow.amount * flow.sign * price;
   }

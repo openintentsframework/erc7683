@@ -24,8 +24,8 @@ const context: SolverContext = {
   fillerAddress: account,
   isWhitelisted: () => false,
   getWitnessResolver: () => undefined,
-  getTokenPriceUsd: () => 0n,
-  getGasPriceUsd: () => 0n,
+  getTokenPriceUsd: async () => 0n,
+  getGasPriceUsd: async () => 0n,
   getConfirmationThreshold: () => ({ etaFromBroadcast: 0, confirmations: 1 }),
   getTimeToBlock: async (chainId, targetBlockNumber) =>
     Math.max(0, Number(targetBlockNumber) - Number(await chains[Number(chainId) - 1]!.publicClient.getBlockNumber())) * BLOCK_TIME_MS,
@@ -134,4 +134,3 @@ await run('ExecutionOutput', new Uint8Array());
 await run('Query', new Uint8Array());
 
 await run('TimestampLowerBound', new Uint8Array());
-
