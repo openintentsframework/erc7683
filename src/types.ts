@@ -32,13 +32,6 @@ export type Attribute =
   | Attribute_NeedsStep
   | Attribute_RevertPolicy;
 
-export interface OutputBinding {
-  field: string;
-  varIdx: number;
-  lowerBound?: Formula;
-  upperBound?: Formula;
-}
-
 export interface Attribute_SpendsERC20 {
   type: 'SpendsERC20';
   token: Account;
@@ -54,7 +47,10 @@ export interface Attribute_SpendsGas {
 
 export interface Attribute_Outputs {
   type: 'Outputs';
-  output: OutputBinding;
+  field: string;
+  varIdx: number;
+  lowerBound?: Formula;
+  upperBound?: Formula;
 }
 
 export interface Attribute_NeedsStep {

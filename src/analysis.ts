@@ -1,8 +1,8 @@
 import type {
+  Attribute_Outputs,
   Attribute_RevertPolicy,
   Attribute_SpendsERC20,
   Formula,
-  OutputBinding,
   ResolvedOrder,
 } from './types.ts';
 import { memoize } from './utils.ts';
@@ -12,7 +12,7 @@ export interface Spends {
   gas?: Formula;
 }
 
-export type Outputs = Record<string, OutputBinding>;
+export type Outputs = Record<string, Attribute_Outputs>;
 
 export interface DependencyNode {
   neededSteps: number[];
@@ -89,17 +89,17 @@ export function getStepOutputs(order: ResolvedOrder, stepIdx: number): Outputs {
     if (attribute.type !== 'Outputs')
       continue;
 
-    switch (attribute.output.field) {
+    switch (attribute.field) {
       case 'block.timestamp':
       case 'block.number':
       case 'receipt.effectiveGasPrice':
-        if (attribute.output.field in outputs)
+        if (attribute.field in outputs)
           throw new Error(`Invalid Outputs: each field may be assigned at most once per step`);
-        outputs[attribute.output.field] = attribute.output;
+        outputs[attribute.field] = attribute;
         break;
 
       default:
-        throw new Error(`Unsupported Outputs field '${attribute.output.field}'`);
+        throw new Error(`Unsupported Outputs field '${attribute.field}'`);
     }
   }
 

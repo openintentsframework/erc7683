@@ -81,12 +81,10 @@ function decodeAttribute(encoded: Hex): Attribute {
       const [field, varIdx, lowerBound, upperBound] = decoded.args;
       return {
         type: 'Outputs',
-        output: {
-          field,
-          varIdx: toSafeNumber(varIdx),
-          lowerBound: decodeOptionalFormula(lowerBound),
-          upperBound: decodeOptionalFormula(upperBound),
-        },
+        field,
+        varIdx: toSafeNumber(varIdx),
+        lowerBound: decodeOptionalFormula(lowerBound),
+        upperBound: decodeOptionalFormula(upperBound),
       };
     }
     case 'NeedsStep': {
