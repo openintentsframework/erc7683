@@ -179,6 +179,23 @@ struct EthLog {
 }
 ```
 
+### Payments
+
+An order includes a list of payments that will be made.
+
+#### Payment: `ERC20`
+
+Parameters:
+
+- `token`: An interoperable address of an ERC-20 token.
+- `sender`: An interoperable address.
+- `amountFormula`: An amount of the token, as a constant or a variable.
+- `recipientVarIdx`: The index of a `PaymentRecipient` variable.
+- `onStepIdx`: The index of a step in the order.
+- `estimatedDelaySeconds`: A duration in seconds.
+
+When the step numbered `onStepIdx` is executed, a payment MUST be made of at least the amount given by `amountFormula` of `token` sourced from `sender`. The payment MUST be transferred to the address value of the variable numbered `recipientVarIdx`, on the chain indicated by `token`. The payment SHOULD be delayed by `estimatedDelaySeconds` with high confidence.
+
 ## Values and Encoding
 
 Values assigned to variables are untyped and represented only by their ABI encoding and whether they are statically or dynamically sized.
