@@ -40,7 +40,7 @@ library Step {
 interface IAttribute {
     function SpendsERC20(bytes memory token, bytes memory amountFormula, bytes memory spender, bytes memory recipient) external;
     function SpendsGas(bytes memory amountFormula) external;
-    function Outputs(string memory field, uint256 varIdx, bytes memory lowerBound, bytes memory upperBound) external;
+    function TimingBounds(string memory field, bytes memory lowerBound, bytes memory upperBound) external;
     function NeedsStep(uint256 stepIdx) external;
     function RevertPolicy(string memory policy, bytes memory expectedReason) external;
 }
@@ -58,8 +58,8 @@ library Attribute {
         return abi.encodeCall(IAttribute.NeedsStep, (stepIdx));
     }
 
-    function Outputs(string memory field, uint256 varIdx, bytes memory lowerBound, bytes memory upperBound) internal pure returns (bytes memory) {
-        return abi.encodeCall(IAttribute.Outputs, (field, varIdx, lowerBound, upperBound));
+    function TimingBounds(string memory field, bytes memory lowerBound, bytes memory upperBound) internal pure returns (bytes memory) {
+        return abi.encodeCall(IAttribute.TimingBounds, (field, lowerBound, upperBound));
     }
 
     function RevertPolicy(string memory policy, bytes memory expectedReason) internal pure returns (bytes memory) {
@@ -113,7 +113,7 @@ interface IVariableRole {
     function PaymentRecipient() external;
     function PaymentChain() external;
     function Pricing() external;
-    function ExecutionOutput() external;
+    function ExecutionOutput(string memory field, uint256 stepIdx) external;
     function Witness(string memory kind, bytes memory data, uint256[] memory variables) external;
     function Query(bytes memory target, bytes4 selector, bytes[] memory arguments, uint256 blockNumber) external;
     function QueryEvents(
@@ -140,8 +140,8 @@ library VariableRole {
         return abi.encodeCall(IVariableRole.Pricing, ());
     }
 
-    function ExecutionOutput() internal pure returns (bytes memory) {
-        return abi.encodeCall(IVariableRole.ExecutionOutput, ());
+    function ExecutionOutput(string memory field, uint256 stepIdx) internal pure returns (bytes memory) {
+        return abi.encodeCall(IVariableRole.ExecutionOutput, (field, stepIdx));
     }
 
     function Witness(string memory kind, bytes memory data, uint256[] memory variables) internal pure returns (bytes memory) {

@@ -7,7 +7,7 @@ import {BasicTarget} from "../common.sol";
 
 // Single-step resolver that calls checkTimestamp with a timestamp 2 seconds in the future.
 // checkTimestamp requires block.timestamp >= argument, so the transaction must wait
-// before it can succeed. An Outputs attribute with a lowerBound tells the filler to wait.
+// before it can succeed. A TimingBounds attribute with a lowerBound tells the filler to wait.
 contract Resolver is IResolver {
     address immutable target;
 
@@ -24,15 +24,14 @@ contract Resolver is IResolver {
         uint256 step0_timestamp = varCount++;
 
         bytes[] memory variables = new bytes[](varCount);
-        variables[step0_timestamp] = VariableRole.ExecutionOutput();
+        variables[step0_timestamp] = VariableRole.ExecutionOutput("block.timestamp", 0);
 
         bytes[] memory step0_arguments = new bytes[](1);
         step0_arguments[0] = Argument.Uint256(targetTimestamp);
 
         bytes[] memory step0_attributes = new bytes[](2);
-        step0_attributes[0] = Attribute.Outputs({
+        step0_attributes[0] = Attribute.TimingBounds({
             field: "block.timestamp",
-            varIdx: step0_timestamp,
             lowerBound: Formula.Constant(targetTimestamp),
             upperBound: ""
         });

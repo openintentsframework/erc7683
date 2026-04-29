@@ -27,7 +27,7 @@ export interface Step_Call {
 export type Attribute =
   | Attribute_SpendsERC20
   | Attribute_SpendsGas
-  | Attribute_Outputs
+  | Attribute_TimingBounds
   | Attribute_NeedsStep
   | Attribute_RevertPolicy;
 
@@ -44,10 +44,9 @@ export interface Attribute_SpendsGas {
   amount: Formula;
 }
 
-export interface Attribute_Outputs {
-  type: 'Outputs';
+export interface Attribute_TimingBounds {
+  type: 'TimingBounds';
   field: string;
-  varIdx: number;
   lowerBound?: Formula;
   upperBound?: Formula;
 }
@@ -110,6 +109,8 @@ export interface VariableRole_Pricing {
 
 export interface VariableRole_ExecutionOutput {
   type: 'ExecutionOutput';
+  field: string;
+  stepIdx: number;
 }
 
 export interface VariableRole_Witness {

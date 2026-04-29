@@ -1,6 +1,6 @@
 import type { Hex, PublicClient, TransactionReceipt } from 'viem';
 import type { SolverContext } from './context.ts';
-import { getDependencies, getStepOutputs, getStepRevertPolicies, type DependencyNode } from './analysis.ts';
+import { getDependencies, getStepExecutionOutputs, getStepRevertPolicies, getStepTimingBounds, type DependencyNode } from './analysis.ts';
 import { buildCallData, envEval } from './env.ts';
 import { abiEncode } from './abi-wrap.ts';
 import type { VariableEnv } from './env.ts';
@@ -136,13 +136,12 @@ async function waitForStepLowerBound(
   stepId: number,
 ): Promise<void> {
   const step = order.steps[stepId]!;
-  const outputs = getStepOutputs(order, stepId);
   const [targetSeconds, targetBlockNumber] = await Promise.all(
     [
-      outputs['block.timestamp'],
-      outputs['block.number'],
+      getStepTimingBounds(order, stepId, 'block.timestamp'),
+      getStepTimingBounds(order, stepId, 'block.number'),
     ].map(
-      output => output?.lowerBound && envEval(env, output.lowerBound)
+      bounds => bounds?.lowerBound && envEval(env, bounds.lowerBound)
     )
   );
   await Promise.all([
@@ -181,32 +180,30 @@ async function applyExecutionOutputs(
   order: ResolvedOrder,
   stepId: number,
 ): Promise<void> {
-  const outputs = getStepOutputs(order, stepId);
+  const outputs = getStepExecutionOutputs(order, stepId);
   let blockPromise: ReturnType<PublicClient['getBlock']> | undefined;
   const getBlock = () => blockPromise ??= publicClient.getBlock({ blockNumber: receipt.blockNumber });
 
-  for (const output of Object.values(outputs)) {
-    if (!output) continue;
-
-    switch (output.field) {
+  for (const [varIdx, field] of outputs) {
+    switch (field) {
       case 'block.number': {
-        env.set(output.varIdx, abiEncode(receipt.blockNumber, 'uint256'));
+        env.set(varIdx, abiEncode(receipt.blockNumber, 'uint256'));
         break;
       }
 
       case 'block.timestamp': {
         const block = await getBlock();
-        env.set(output.varIdx, abiEncode(block.timestamp, 'uint256'));
+        env.set(varIdx, abiEncode(block.timestamp, 'uint256'));
         break;
       }
 
       case 'receipt.effectiveGasPrice': {
-        env.set(output.varIdx, abiEncode(receipt.effectiveGasPrice, 'uint256'));
+        env.set(varIdx, abiEncode(receipt.effectiveGasPrice, 'uint256'));
         break;
       }
 
       default:
-        throw new Error(`Unsupported Outputs field '${output.field}'`);
+        throw new Error(`Unsupported ExecutionOutput field '${field}'`);
     }
   }
 }

@@ -1,9 +1,10 @@
 import type {
-  Attribute_Outputs,
   Attribute_RevertPolicy,
   Attribute_SpendsERC20,
+  Attribute_TimingBounds,
   Formula,
   ResolvedOrder,
+  VariableRole_ExecutionOutput,
 } from './types.ts';
 import { memoize } from './utils.ts';
 
@@ -11,8 +12,6 @@ export interface Spends {
   erc20: Attribute_SpendsERC20[];
   gas?: Formula;
 }
-
-export type Outputs = Record<string, Attribute_Outputs>;
 
 export interface DependencyNode {
   neededSteps: number[];
@@ -45,7 +44,6 @@ export function getStepSpends(order: ResolvedOrder, stepIdx: number): Spends {
 export function getStepInputs(order: ResolvedOrder, stepIdx: number): number[] {
   const step = order.steps[stepIdx]!;
   const spends = getStepSpends(order, stepIdx);
-  const outputs = getStepOutputs(order, stepIdx);
   const inputs = new Set<number>();
 
   for (const arg of step.arguments) {
@@ -61,11 +59,16 @@ export function getStepInputs(order: ResolvedOrder, stepIdx: number): number[] {
   if (spends.gas?.type === 'Variable')
     inputs.add(spends.gas.varIdx);
 
-  for (const { lowerBound, upperBound } of Object.values(outputs)) {
-    if (lowerBound?.type === 'Variable')
-      inputs.add(lowerBound.varIdx);
-    if (upperBound?.type === 'Variable')
-      inputs.add(upperBound.varIdx);
+  for (const attribute of step.attributes) {
+    switch (attribute.type) {
+      case 'TimingBounds': {
+        if (attribute.lowerBound?.type === 'Variable')
+          inputs.add(attribute.lowerBound.varIdx);
+        if (attribute.upperBound?.type === 'Variable')
+          inputs.add(attribute.upperBound.varIdx);
+        break;
+      }
+    }
   }
 
   return [...inputs];
@@ -81,55 +84,31 @@ export function getStepRevertPolicies(
     .filter(attr => policy === undefined || attr.policy === policy);
 }
 
-export function getStepOutputs(order: ResolvedOrder, stepIdx: number): Outputs {
-  const outputs: Outputs = {};
+export function getStepTimingBounds(order: ResolvedOrder, stepIdx: number, field: string): Attribute_TimingBounds | undefined {
   const step = order.steps[stepIdx]!;
-
-  for (const attribute of step.attributes) {
-    if (attribute.type !== 'Outputs')
-      continue;
-
-    switch (attribute.field) {
-      case 'block.timestamp':
-      case 'block.number':
-      case 'receipt.effectiveGasPrice':
-        if (attribute.field in outputs)
-          throw new Error(`Invalid Outputs: each field may be assigned at most once per step`);
-        outputs[attribute.field] = attribute;
-        break;
-
-      default:
-        throw new Error(`Unsupported Outputs field '${attribute.field}'`);
-    }
+  const matching = step.attributes
+    .filter(attribute => attribute.type === 'TimingBounds')
+    .filter(attribute => attribute.field === field);
+  // TODO: support multiple TimingBounds attributes for the same field.
+  if (matching.length > 1) {
+    throw new Error(`Multiple TimingBounds attributes for '${field}'`);
   }
+  return matching[0];
+}
 
-  if (Object.keys(outputs).length > 0 && getStepRevertPolicies(order, stepIdx, 'ignore').length > 0) {
-    throw new Error(`Invalid Outputs: steps with outputs may not use ignore revert policy`);
-  }
-
-  return outputs;
+export function getStepExecutionOutputs(order: ResolvedOrder, stepIdx: number): [number, string][] {
+  return order.variables
+    .flatMap((role, varIdx) =>
+      role.type === 'ExecutionOutput' && role.stepIdx === stepIdx
+      ? [[varIdx, role.field] satisfies [number, string]]
+      : []
+    )
 }
 
 export function getStepNeeds(order: ResolvedOrder, stepIdx: number): number[] {
   return order.steps[stepIdx]!.attributes
     .filter(attribute => attribute.type === 'NeedsStep')
     .map(attribute => attribute.stepIdx);
-}
-
-export function getVariableProducers(order: ResolvedOrder): Map<number, number> {
-  const producers = new Map<number, number>();
-
-  for (const stepIdx of order.steps.keys()) {
-    for (const output of Object.values(getStepOutputs(order, stepIdx))) {
-      if (order.variables[output.varIdx]?.type !== 'ExecutionOutput')
-        throw new Error(`Invalid Outputs: targets must be ExecutionOutput variables`);
-      if (producers.has(output.varIdx))
-        throw new Error(`Invalid Outputs: variables must be assigned by at most one output`);
-      producers.set(output.varIdx, stepIdx);
-    }
-  }
-
-  return producers;
 }
 
 export function getDependencies(
@@ -148,14 +127,8 @@ export function getDependencies(
 }
 
 function getVariableNeeds(order: ResolvedOrder, varIdx: number): number[] {
-  if (order.variables[varIdx]!.type !== 'ExecutionOutput')
-    return [];
-
-  const producer = getVariableProducers(order).get(varIdx);
-  if (producer === undefined)
-    throw new Error(`Invalid Outputs: ExecutionOutput variable ${varIdx} is never produced`);
-
-  return [producer];
+  const role = order.variables[varIdx]!;
+  return role.type === 'ExecutionOutput' ? [role.stepIdx] : [];
 }
 
 function getVariableInputs(order: ResolvedOrder, varIdx: number): number[] {

@@ -22,21 +22,18 @@ contract Resolver is IResolver {
         uint256 step0_timestamp = varCount++;
 
         bytes[] memory variables = new bytes[](varCount);
-        variables[step0_timestamp] = VariableRole.ExecutionOutput();
+        variables[step0_timestamp] = VariableRole.ExecutionOutput("block.timestamp", 0);
 
         bytes[] memory step0_arguments = new bytes[](2);
         step0_arguments[0] = Argument.String("hello");
         step0_arguments[1] = Argument.Uint256(42);
-
-        bytes[] memory step0_attributes = new bytes[](1);
-        step0_attributes[0] = Attribute.Outputs("block.timestamp", step0_timestamp, "", "");
 
         order.steps = new bytes[](2);
         order.steps[0] = Step.Call(
             InteroperableAddress.formatEvmV1(block.chainid, target),
             BasicTarget.run.selector,
             step0_arguments,
-            step0_attributes
+            new bytes[](0)
         );
 
         bytes[] memory step1_arguments = new bytes[](2);

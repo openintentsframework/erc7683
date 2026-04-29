@@ -1,5 +1,5 @@
 import type { SolverContext } from './context.ts';
-import { getDependencyClosure, getStepRevertPolicies, getStepSpends } from './analysis.ts';
+import { getDependencyClosure, getStepExecutionOutputs, getStepRevertPolicies, getStepSpends } from './analysis.ts';
 import type { ResolvedOrder } from './types.ts';
 
 export function prequote(ctx: SolverContext, order: ResolvedOrder): void {
@@ -7,6 +7,7 @@ export function prequote(ctx: SolverContext, order: ResolvedOrder): void {
   // - every referenced step and variable index fails with a clear validation error
   // - output bounds are uint256-compatible
   checkValidRevertPolicies(order);
+  checkValidExecutionOutputs(order);
 
   for (const assumption of order.assumptions) {
     if (!ctx.isWhitelisted(assumption.trusted, assumption.kind)) {
@@ -17,6 +18,17 @@ export function prequote(ctx: SolverContext, order: ResolvedOrder): void {
   for (const variable of order.variables) {
     if (variable.type === 'Witness' && !ctx.getWitnessResolver(variable.kind)) {
       throw new Error(`Unsupported witness kind '${variable.kind}'`);
+    }
+  }
+}
+
+function checkValidExecutionOutputs(order: ResolvedOrder): void {
+  for (const [stepIdx] of order.steps.entries()) {
+    if (
+      getStepExecutionOutputs(order, stepIdx).length > 0 &&
+      getStepRevertPolicies(order, stepIdx, 'ignore').length > 0
+    ) {
+      throw new Error(`Invalid ExecutionOutput: steps with outputs may not use ignore revert policy`);
     }
   }
 }

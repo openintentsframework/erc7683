@@ -13,7 +13,7 @@ export const stepAbi = parseAbi([
 export const attributeAbi = parseAbi([
   'function SpendsERC20(bytes token, bytes amountFormula, bytes spender, bytes recipient) external',
   'function SpendsGas(bytes amountFormula) external',
-  'function Outputs(string field, uint256 varIdx, bytes lowerBound, bytes upperBound) external',
+  'function TimingBounds(string field, bytes lowerBound, bytes upperBound) external',
   'function NeedsStep(uint256 stepIdx) external',
   'function RevertPolicy(string policy, bytes expectedReason) external',
 ]);
@@ -31,7 +31,7 @@ export const variableRoleAbi = parseAbi([
   'function PaymentRecipient() external',
   'function PaymentChain() external',
   'function Pricing() external',
-  'function ExecutionOutput() external',
+  'function ExecutionOutput(string field, uint256 stepIdx) external',
   'function Witness(string kind, bytes data, uint256[] variables) external',
   'function Query(bytes target, bytes4 selector, bytes[] arguments, uint256 blockNumber) external',
   'function QueryEvents(bytes emitter, bytes1 topicMatch, bytes32 topic0, bytes32 topic1, bytes32 topic2, bytes32 topic3, uint256 blockNumber) external',

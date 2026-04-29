@@ -1,5 +1,5 @@
 import type { SolverContext } from './context.ts';
-import { getDependencies, getStepOutputs, type DependencyNode } from './analysis.ts';
+import { getDependencies, getStepTimingBounds, type DependencyNode } from './analysis.ts';
 import { envEval, type VariableEnv } from './env.ts';
 import type { AssetFlow } from './quote.ts';
 import type { Formula, ResolvedOrder } from './types.ts';
@@ -25,21 +25,21 @@ async function validateWorstCaseCompletion(
   const dependencies = getDependencies(order);
 
   const stepBounds = await Promise.all(order.steps.map(async (step, stepIdx) => {
-    const outputs = getStepOutputs(order, stepIdx);
-
     const evalBound = async (bound?: Formula) =>
       bound && Number(await envEval(env, bound));
 
+    const timestampBounds = getStepTimingBounds(order, stepIdx, 'block.timestamp');
+    const blockNumberBounds = getStepTimingBounds(order, stepIdx, 'block.number');
     const [
       timestampLower = -Infinity,
       timestampUpper = +Infinity,
       blockNumberLower,
       blockNumberUpper,
     ] = await Promise.all([
-      evalBound(outputs['block.timestamp']?.lowerBound),
-      evalBound(outputs['block.timestamp']?.upperBound),
-      evalBound(outputs['block.number']?.lowerBound),
-      evalBound(outputs['block.number']?.upperBound),
+      evalBound(timestampBounds?.lowerBound),
+      evalBound(timestampBounds?.upperBound),
+      evalBound(blockNumberBounds?.lowerBound),
+      evalBound(blockNumberBounds?.upperBound),
     ]);
 
     const etaBlock = async (blockNumber: number) =>

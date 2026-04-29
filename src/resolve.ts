@@ -76,12 +76,11 @@ function decodeAttribute(encoded: Hex): Attribute {
         amount: decodeFormula(amountFormula),
       };
     }
-    case 'Outputs': {
-      const [field, varIdx, lowerBound, upperBound] = decoded.args;
+    case 'TimingBounds': {
+      const [field, lowerBound, upperBound] = decoded.args;
       return {
-        type: 'Outputs',
+        type: 'TimingBounds',
         field,
-        varIdx: toSafeNumber(varIdx),
         lowerBound: decodeOptionalFormula(lowerBound),
         upperBound: decodeOptionalFormula(upperBound),
       };
@@ -129,6 +128,10 @@ function decodeVariableRole(encoded: Hex): VariableRole {
   const decoded = decodeFunctionData({ abi: variableRoleAbi, data: encoded });
 
   switch (decoded.functionName) {
+    case 'ExecutionOutput': {
+      const [field, stepIdx] = decoded.args;
+      return { type: 'ExecutionOutput', field, stepIdx: toSafeNumber(stepIdx) };
+    }
     case 'Witness': {
       const [kind, data, variables] = decoded.args;
       return { type: 'Witness', kind, data, variables: variables.map(toSafeNumber) };
