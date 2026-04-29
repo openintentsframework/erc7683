@@ -142,7 +142,6 @@ function getVariableInputs(order: ResolvedOrder, varIdx: number): number[] {
         .map(arg => arg.varIdx);
     case 'PaymentRecipient':
     case 'PaymentChain':
-    case 'Pricing':
     case 'ExecutionOutput':
     case 'QueryEvents':
       return [];

@@ -20,7 +20,6 @@ export class VariableEnv {
   set(varIdx: number, value: AbiEncodedValue): void {
     const role = this.roles[varIdx]!;
     switch (role.type) {
-      case 'Pricing':
       case 'ExecutionOutput':
       case 'Witness': {
         this.cache[varIdx] = { value: Promise.resolve(value), tick: this.tick++ };
@@ -62,7 +61,6 @@ export class VariableEnv {
         return await envGetLogs(this.ctx, role);
       }
 
-      case 'Pricing':
       case 'ExecutionOutput':
       case 'Witness': {
         throw new Error(`Variable ${varIdx} (${role.type}) not set`);

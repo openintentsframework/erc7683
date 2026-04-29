@@ -89,7 +89,6 @@ export interface Payment_ERC20 {
 export type VariableRole =
   | VariableRole_PaymentRecipient
   | VariableRole_PaymentChain
-  | VariableRole_Pricing
   | VariableRole_ExecutionOutput
   | VariableRole_Witness
   | VariableRole_Query
@@ -101,10 +100,6 @@ export interface VariableRole_PaymentRecipient {
 
 export interface VariableRole_PaymentChain {
   type: 'PaymentChain';
-}
-
-export interface VariableRole_Pricing {
-  type: 'Pricing';
 }
 
 export interface VariableRole_ExecutionOutput {

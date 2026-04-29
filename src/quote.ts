@@ -15,14 +15,11 @@ export async function quote(
 ): Promise<QuoteResult> {
   const flowFormulas = collectFlowFormulas(order);
 
-  const pricingVars = collectPricingVars(order);
-  if (pricingVars.length > 0) {
-    // TODO: use black box optimization to find values based on computed pnl
-    // NOTE: pricing decisions that constrain realized execution outputs
-    // must remain compatible with hard step deadlines and execution slack.
-    throw new Error('Pricing variables not supported');
-  }
-
+  // TODO: use black box optimization to estimate flow amounts whose formulas
+  // depend on execution outputs that are not known at quote time, and return
+  // those timing and fee decisions.
+  // NOTE: formulas that depend on realized execution outputs such as inclusion
+  // timing must remain compatible with hard step deadlines and execution slack.
   const flowAmounts = await computeFlowAmounts(ctx, env, flowFormulas);
   const pnlUsd = await computePnLUsd(ctx, flowAmounts);
 
@@ -31,16 +28,6 @@ export async function quote(
   }
 
   return { flows: flowAmounts };
-}
-
-function collectPricingVars(order: ResolvedOrder): number[] {
-  const pricingVars: number[] = [];
-  for (let i = 0; i < order.variables.length; i++) {
-    if (order.variables[i]?.type === 'Pricing') {
-      pricingVars.push(i);
-    }
-  }
-  return pricingVars;
 }
 
 async function computePnLUsd(
