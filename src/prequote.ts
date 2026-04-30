@@ -10,8 +10,8 @@ export function prequote(ctx: SolverContext, order: ResolvedOrder): void {
   checkValidExecutionOutputs(order);
 
   for (const assumption of order.assumptions) {
-    if (!ctx.isWhitelisted(assumption.trusted, assumption.kind)) {
-      throw new Error(`Untrusted account ${assumption.trusted.address} kind '${assumption.kind}'`);
+    if (!ctx.isAssumptionAccepted(assumption)) {
+      throw new Error(`Unaccepted assumption '${assumption.name}'`);
     }
   }
 

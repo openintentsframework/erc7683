@@ -5,8 +5,8 @@ import type { AbiEncodedValue } from './abi-wrap.ts';
 export interface ResolvedOrder {
   steps: Step[];
   variables: VariableRole[];
-  assumptions: Assumption[];
   payments: Payment[];
+  assumptions: Assumption[];
 }
 
 export interface Account {
@@ -134,8 +134,8 @@ export interface VariableRole_QueryEvents {
 }
 
 export interface Assumption {
-  trusted: Account;
-  kind: string;
+  name: string;
+  data: Hex;
 }
 
 export type Argument = Argument_Variable | Argument_AbiEncodedValue;

@@ -22,7 +22,7 @@ const context: SolverContext = {
   paymentChain: 1n,
   paymentRecipient: account,
   fillerAddress: account,
-  isWhitelisted: () => false,
+  isAssumptionAccepted: () => false,
   getWitnessResolver: () => undefined,
   getTokenPriceUsd: async () => 0n,
   getGasPriceUsd: async () => 0n,

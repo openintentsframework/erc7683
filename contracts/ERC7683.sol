@@ -5,13 +5,13 @@ interface IResolver {
     struct ResolvedOrder {
         bytes[] steps;
         bytes[] variables;
-        Assumption[] assumptions;
         bytes[] payments;
+        Assumption[] assumptions;
     }
 
     struct Assumption {
-        bytes trusted;
-        string kind;
+        string name;
+        bytes data;
     }
 
     function resolve(bytes calldata payload) external view returns (ResolvedOrder memory);

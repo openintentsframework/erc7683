@@ -2,8 +2,8 @@ import { parseAbi } from 'viem';
 
 export const resolverAbi = parseAbi([
   'function resolve(bytes payload) view returns (ResolvedOrder)',
-  'struct ResolvedOrder { bytes[] steps; bytes[] variables; Assumption[] assumptions; bytes[] payments; }',
-  'struct Assumption { bytes trusted; string kind; }',
+  'struct ResolvedOrder { bytes[] steps; bytes[] variables; bytes[] payments; Assumption[] assumptions; }',
+  'struct Assumption { string name; bytes data; }',
 ]);
 
 export const stepAbi = parseAbi([

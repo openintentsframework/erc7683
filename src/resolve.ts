@@ -17,15 +17,15 @@ export async function resolve(client: PublicClient, resolver: Address, payload: 
   return {
     steps: result.steps.map(decodeStep),
     variables: result.variables.map(decodeVariableRole),
-    assumptions: result.assumptions.map(decodeAssumption),
     payments: result.payments.map(decodePayment),
+    assumptions: result.assumptions.map(decodeAssumption),
   };
 }
 
-function decodeAssumption(encoded: { trusted: Hex; kind: string }) {
+function decodeAssumption(encoded: { name: string; data: Hex }) {
   return {
-    trusted: decodeERC7930Address(encoded.trusted),
-    kind: encoded.kind,
+    name: encoded.name,
+    data: encoded.data,
   };
 }
 
