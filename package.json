@@ -11,5 +11,8 @@
     "signal-exit": "^4.1.0",
     "typescript": "^5.9.3",
     "viem": "^2.47.4"
+  },
+  "dependencies": {
+    "@wonderland/interop-addresses": "^0.6.0"
   }
 }

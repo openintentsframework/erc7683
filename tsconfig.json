@@ -3,7 +3,7 @@
     "noEmit": true,
     "module": "nodenext",
     "target": "esnext",
-    "types": [],
+    "types": ["node"],
     "noUncheckedIndexedAccess": true,
     "strict": true,
     "verbatimModuleSyntax": true,
