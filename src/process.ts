@@ -12,6 +12,7 @@ export interface ProcessResult {
   order: ResolvedOrder;
   env: VariableEnv;
   flows: Required<AssetFlow<bigint>>[];
+  pnlUsd: bigint;
   receipts: Partial<TransactionReceipt[]> | undefined;
 }
 
@@ -29,11 +30,11 @@ export async function process(
   prequote(ctx, order);
 
   const env = new VariableEnv(ctx, order.variables);
-  const { flows } = await quote(ctx, env, order);
+  const { flows, pnlUsd } = await quote(ctx, env, order);
 
   await prefill(ctx, order, env, flows);
 
   const receipts = await fill(ctx, order, env);
 
-  return { order, env, flows, receipts };
+  return { order, env, flows, pnlUsd, receipts };
 }

@@ -6,6 +6,7 @@ import type { Formula, ResolvedOrder, Step } from './types.ts';
 
 interface QuoteResult {
   flows: Required<AssetFlow<bigint>>[];
+  pnlUsd: bigint;
 }
 
 export async function quote(
@@ -27,7 +28,7 @@ export async function quote(
     throw new Error('Negative PnL');
   }
 
-  return { flows: flowAmounts };
+  return { flows: flowAmounts, pnlUsd };
 }
 
 async function computePnLUsd(
@@ -91,9 +92,6 @@ function collectFlowFormulas(order: ResolvedOrder): AssetFlow<Formula>[] {
 
   for (const payment of order.payments) {
     if (payment.type === 'ERC20') {
-      // TODO
-      if (payment.estimatedDelaySeconds !== 0n) throw new Error('Delayed payment not supported');
-
       flows.push({
         chainId: payment.token.chainId,
         token: payment.token.address,

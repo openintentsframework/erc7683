@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {InteroperableAddress} from "@openzeppelin/contracts/utils/draft-InteroperableAddress.sol";
-import {IResolver, Step, VariableRole, Argument} from "../ERC7683.sol";
+import {IResolver, Step, VariableRole, Argument} from "../../ERC7683.sol";
 import {BasicTarget} from "../common.sol";
 
 // Demonstrates the Query variable role. BasicTarget has a magic value fixed at deployment
@@ -16,7 +16,8 @@ contract Resolver is IResolver {
         target = new BasicTarget();
     }
 
-    function wrappedMagic() external view returns (string memory, uint256 result) {
+    function wrappedMagic() external view returns (string memory empty, uint256 result) {
+        empty = "";
         result = target.magic();
     }
 

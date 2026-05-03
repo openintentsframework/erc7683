@@ -180,6 +180,18 @@ library Argument {
         return abi.encode(varIdx);
     }
 
+    function Address(address value) internal pure returns (bytes memory) {
+        return abi.encode("", value);
+    }
+
+    function Bytes32(bytes32 value) internal pure returns (bytes memory) {
+        return abi.encode("", value);
+    }
+
+    function Uint8(uint8 value) internal pure returns (bytes memory) {
+        return abi.encode("", value);
+    }
+
     function Uint256(uint256 value) internal pure returns (bytes memory) {
         return abi.encode("", value);
     }

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {InteroperableAddress} from "@openzeppelin/contracts/utils/draft-InteroperableAddress.sol";
-import {IResolver, Step, Argument} from "../ERC7683.sol";
+import {IResolver, Step, Argument} from "../../ERC7683.sol";
 import {BasicTarget} from "../common.sol";
 
 // A minimal resolver with a single step: calls BasicTarget.run("hello", 42) with no

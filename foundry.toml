@@ -1,5 +1,14 @@
 [profile.default]
 src = "contracts"
+via_ir = true
+optimizer = true
+optimizer_runs = 800
+remappings = [
+  "across/=lib/across/",
+  "@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
+  "@openzeppelin/contracts-v4/=node_modules/@openzeppelin/contracts-v4/",
+  "@openzeppelin/contracts-upgradeable-v4/=node_modules/@openzeppelin/contracts-upgradeable-v4/",
+]
 
 [lint]
 lint_on_build = false

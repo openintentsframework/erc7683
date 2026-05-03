@@ -13,5 +13,6 @@
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
     "moduleResolution": "node16"
-  }
+  },
+  "exclude": ["lib"]
 }

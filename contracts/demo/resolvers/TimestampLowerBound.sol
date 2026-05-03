@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {InteroperableAddress} from "@openzeppelin/contracts/utils/draft-InteroperableAddress.sol";
-import {IResolver, Step, Attribute, VariableRole, Formula, Argument} from "../ERC7683.sol";
+import {IResolver, Step, Attribute, VariableRole, Formula, Argument} from "../../ERC7683.sol";
 import {BasicTarget} from "../common.sol";
 
 // Single-step resolver that calls checkTimestamp with a timestamp 2 seconds in the future.

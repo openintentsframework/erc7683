@@ -1,0 +1,3 @@
+[submodule "lib/across"]
+	path = lib/across
+	url = https://github.com/across-protocol/contracts
