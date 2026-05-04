@@ -50,13 +50,13 @@ contract Resolver is IResolver {
         order.assumptions = new Assumption[](0);
 
         bytes[] memory step0Arguments = new bytes[](7);
-        step0Arguments[0] = Argument.Address(p.user);
-        step0Arguments[1] = Argument.Address(p.solver);
-        step0Arguments[2] = Argument.Uint256(p.amount);
-        step0Arguments[3] = Argument.Uint256(p.deadline);
-        step0Arguments[4] = Argument.Uint8(p.v);
-        step0Arguments[5] = Argument.Bytes32(p.r);
-        step0Arguments[6] = Argument.Bytes32(p.s);
+        step0Arguments[0] = Argument.ConstAddress(p.user);
+        step0Arguments[1] = Argument.ConstAddress(p.solver);
+        step0Arguments[2] = Argument.ConstUint256(p.amount);
+        step0Arguments[3] = Argument.ConstUint256(p.deadline);
+        step0Arguments[4] = Argument.ConstUint8(p.v);
+        step0Arguments[5] = Argument.ConstBytes32(p.r);
+        step0Arguments[6] = Argument.ConstBytes32(p.s);
 
         bytes[] memory step0Attributes = new bytes[](1);
         step0Attributes[0] = Attribute.RevertPolicy("abort", "");
@@ -69,8 +69,8 @@ contract Resolver is IResolver {
         );
 
         bytes[] memory step1Arguments = new bytes[](2);
-        step1Arguments[0] = Argument.Address(p.user);
-        step1Arguments[1] = Argument.Uint256(p.amount);
+        step1Arguments[0] = Argument.ConstAddress(p.user);
+        step1Arguments[1] = Argument.ConstUint256(p.amount);
 
         bytes[] memory step1Attributes = new bytes[](2);
         step1Attributes[0] = Attribute.NeedsStep(0);
@@ -89,9 +89,9 @@ contract Resolver is IResolver {
         );
 
         bytes[] memory step2Arguments = new bytes[](3);
-        step2Arguments[0] = Argument.Address(p.user);
+        step2Arguments[0] = Argument.ConstAddress(p.user);
         step2Arguments[1] = Argument.Variable(paymentRecipient);
-        step2Arguments[2] = Argument.Uint256(p.amount);
+        step2Arguments[2] = Argument.ConstUint256(p.amount);
 
         bytes[] memory step2Attributes = new bytes[](2);
         step2Attributes[0] = Attribute.NeedsStep(0);

@@ -25,8 +25,8 @@ contract Resolver is IResolver {
         variables[step0_timestamp] = VariableRole.ExecutionOutput("block.timestamp", 0);
 
         bytes[] memory step0_arguments = new bytes[](2);
-        step0_arguments[0] = Argument.String("hello");
-        step0_arguments[1] = Argument.Uint256(42);
+        step0_arguments[0] = Argument.ConstString("hello");
+        step0_arguments[1] = Argument.ConstUint256(42);
 
         order.steps = new bytes[](2);
         order.steps[0] = Step.Call(
@@ -37,7 +37,7 @@ contract Resolver is IResolver {
         );
 
         bytes[] memory step1_arguments = new bytes[](2);
-        step1_arguments[0] = Argument.String("hello");
+        step1_arguments[0] = Argument.ConstString("hello");
         step1_arguments[1] = Argument.Variable(step0_timestamp);
 
         bytes[] memory step1_attributes = new bytes[](1);

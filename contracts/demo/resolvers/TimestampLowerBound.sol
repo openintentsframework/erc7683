@@ -27,7 +27,7 @@ contract Resolver is IResolver {
         variables[step0_timestamp] = VariableRole.ExecutionOutput("block.timestamp", 0);
 
         bytes[] memory step0_arguments = new bytes[](1);
-        step0_arguments[0] = Argument.Uint256(targetTimestamp);
+        step0_arguments[0] = Argument.ConstUint256(targetTimestamp);
 
         bytes[] memory step0_attributes = new bytes[](2);
         step0_attributes[0] = Attribute.TimingBounds({

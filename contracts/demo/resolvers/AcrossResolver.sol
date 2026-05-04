@@ -65,7 +65,7 @@ contract Resolver is IResolver {
 
         bytes[] memory step0Arguments = new bytes[](3);
         step0Arguments[0] = abi.encode("", _relayData(p));
-        step0Arguments[1] = Argument.Uint256(p.originChainId);
+        step0Arguments[1] = Argument.ConstUint256(p.originChainId);
         step0Arguments[2] = Argument.Variable(paymentRecipient);
 
         bytes[] memory step0Attributes = new bytes[](4);

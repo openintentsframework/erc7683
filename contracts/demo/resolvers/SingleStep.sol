@@ -24,8 +24,8 @@ contract Resolver is IResolver {
         order.steps = new bytes[](1);
 
         bytes[] memory step0_arguments = new bytes[](2);
-        step0_arguments[0] = Argument.String("hello");
-        step0_arguments[1] = Argument.Uint256(42);
+        step0_arguments[0] = Argument.ConstString("hello");
+        step0_arguments[1] = Argument.ConstUint256(42);
 
         order.steps[0] = Step.Call(
             InteroperableAddress.formatEvmV1(block.chainid, target),
