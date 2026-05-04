@@ -1,4 +1,4 @@
-import type { AbiType, AbiTypeToPrimitiveType } from 'abitype';
+import type { AbiParameter, AbiParameterToPrimitiveType, AbiType, AbiTypeToPrimitiveType } from 'abitype';
 import { concat, encodeAbiParameters, hexToNumber, size, slice, type Hex } from 'viem';
 
 export interface AbiEncodedValue {
@@ -6,10 +6,13 @@ export interface AbiEncodedValue {
   encoding: Hex;
 }
 
-export function abiEncode<const T extends AbiType>(value: AbiTypeToPrimitiveType<T>, type: T): AbiEncodedValue {
-  return decodeAbiWrappedValue(
+export function abiEncode<const T extends AbiType>(value: AbiTypeToPrimitiveType<T>, type: T): AbiEncodedValue;
+export function abiEncode<const T extends AbiParameter>(value: AbiParameterToPrimitiveType<T>, parameter: T): AbiEncodedValue;
+export function abiEncode(value: unknown, parameter: AbiType | AbiParameter): AbiEncodedValue {
+  const abiParameter = typeof parameter === 'string' ? { type: parameter } : parameter;
+  return decodeFramedAbi(
     // @ts-ignore
-    encodeAbiParameters([{ type: 'string' }, { type }], ["", value])
+    encodeAbiParameters([{ type: 'string' }, abiParameter], ["", value])
   );
 }
 
@@ -21,7 +24,7 @@ const DYN_PREFIX = concat([
   '0x0000000000000000000000000000000000000000000000000000000000000000',
 ]);
 
-export function decodeAbiWrappedValue(encoded: Hex): AbiEncodedValue {
+export function decodeFramedAbi(encoded: Hex): AbiEncodedValue {
   if (encoded.startsWith(DYN_PREFIX)) {
     const encoding = slice(encoded, size(DYN_PREFIX));
     return { type: 'Dynamic', encoding };

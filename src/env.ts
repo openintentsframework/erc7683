@@ -1,7 +1,7 @@
-import { concat, decodeAbiParameters, encodeAbiParameters, formatLog, numberToHex, size, type Hex, type Log } from 'viem';
+import { concat, decodeAbiParameters, formatLog, numberToHex, size, type Hex, type Log } from 'viem';
 import type { Account, Argument, Formula, VariableRole, VariableRole_QueryEvents } from './types.ts';
 import type { SolverContext } from './context.ts';
-import { abiEncode, decodeAbiWrappedValue, type AbiEncodedValue } from './abi-wrap.ts';
+import { abiEncode, decodeFramedAbi, type AbiEncodedValue } from './abi-encoding.ts';
 import { ethLogAbi } from './abis.ts';
 
 // Assumes resolver does not create dependency cycles between variables.
@@ -54,7 +54,7 @@ export class VariableEnv {
       }
 
       case 'Query': {
-        return decodeAbiWrappedValue(await envCall(this.ctx, this, role));
+        return decodeFramedAbi(await envCall(this.ctx, this, role));
       }
 
       case 'QueryEvents': {
@@ -167,9 +167,7 @@ async function envGetLogs(
     };
   });
 
-  return decodeAbiWrappedValue(
-    encodeAbiParameters(ethLogAbi, [decodedLogs]),
-  );
+  return abiEncode(decodedLogs, ethLogAbi[0]!);
 }
 
 export async function buildCallData(env: VariableEnv, spec: CallSpec): Promise<Hex> {

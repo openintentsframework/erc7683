@@ -1,6 +1,6 @@
 import type { Address, Hex } from 'viem';
 
-import type { AbiEncodedValue } from './abi-wrap.ts';
+import type { AbiEncodedValue } from './abi-encoding.ts';
 
 export interface ResolvedOrder {
   steps: Step[];

@@ -2,7 +2,7 @@ import type { Hex, PublicClient, TransactionReceipt } from 'viem';
 import type { SolverContext } from './context.ts';
 import { getDependencies, getStepExecutionOutputs, getStepRevertPolicies, getStepTimingBounds, type DependencyNode } from './analysis.ts';
 import { buildCallData, envEval } from './env.ts';
-import { abiEncode } from './abi-wrap.ts';
+import { abiEncode } from './abi-encoding.ts';
 import type { VariableEnv } from './env.ts';
 import type { ResolvedOrder } from './types.ts';
 import { memoize } from './utils.ts';

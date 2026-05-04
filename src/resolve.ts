@@ -2,7 +2,7 @@ import type { Hex, Address, PublicClient } from 'viem';
 import { decodeFunctionData, getAddress, toHex, hexToBigInt, hexToNumber, size, slice } from 'viem';
 import type { Attribute, ResolvedOrder, Account, Argument, Formula, Payment, Step, VariableRole } from './types.ts';
 import { resolverAbi, attributeAbi, formulaAbi, paymentAbi, stepAbi, variableRoleAbi } from './abis.ts';
-import { decodeAbiWrappedValue } from './abi-wrap.ts';
+import { decodeFramedAbi } from './abi-encoding.ts';
 
 const UINT256_MAX = (1n << 256n) - 1n;
 
@@ -51,7 +51,7 @@ function decodeArgument(encoded: Hex): Argument {
   if (size(encoded) === 32) {
     return { type: 'Variable', varIdx: hexToNumber(encoded) };
   } else {
-    return { type: 'AbiEncodedValue', value: decodeAbiWrappedValue(encoded) };
+    return { type: 'AbiEncodedValue', value: decodeFramedAbi(encoded) };
   }
 }
 

@@ -1,6 +1,6 @@
 import type { Address, Chain, Hex, PublicClient, Transport, WalletClient as ViemWalletClient } from 'viem';
 import type { Account, Assumption } from './types.ts';
-import type { AbiEncodedValue } from './abi-wrap.ts';
+import type { AbiEncodedValue } from './abi-encoding.ts';
 
 export type WalletClient = ViemWalletClient<Transport, Chain>;
 
