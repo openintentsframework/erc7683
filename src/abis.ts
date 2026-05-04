@@ -15,6 +15,7 @@ export const attributeAbi = parseAbi([
   'function SpendsGas(bytes amountFormula) external',
   'function TimingBounds(string field, bytes lowerBound, bytes upperBound) external',
   'function NeedsStep(uint256 stepIdx) external',
+  'function NeedsVariable(uint256 varIdx) external',
   'function RevertPolicy(string policy, bytes expectedReason) external',
 ]);
 

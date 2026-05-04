@@ -44,6 +44,16 @@ The call has a hard dependency on the step numbered `stepIdx`.
 
 The attribute MAY be omitted if the dependency is implied by a hard dependency on a variable.
 
+#### Attribute: `NeedsVariable`
+
+Parameters:
+
+- `varIdx`: The index of a variable in the order.
+
+The call has a hard dependency on the variable numbered `varIdx`.
+
+The attribute MAY be omitted if the dependency is implied by the call arguments, formulas, or another variable dependency.
+
 #### Attribute: `SpendsERC20`
 
 Parameters:
@@ -313,6 +323,7 @@ interface IAttribute {
     /// @param upperBound Empty, or `IFormula` ABI calldata.
     function TimingBounds(string calldata field, bytes calldata lowerBound, bytes calldata upperBound) external;
     function NeedsStep(uint256 stepIdx) external;
+    function NeedsVariable(uint256 varIdx) external;
     function RevertPolicy(string calldata policy, bytes calldata expectedReason) external;
 }
 

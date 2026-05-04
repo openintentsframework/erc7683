@@ -68,6 +68,10 @@ export function getStepInputs(order: ResolvedOrder, stepIdx: number): number[] {
           inputs.add(attribute.upperBound.varIdx);
         break;
       }
+      case 'NeedsVariable': {
+        inputs.add(attribute.varIdx);
+        break;
+      }
     }
   }
 

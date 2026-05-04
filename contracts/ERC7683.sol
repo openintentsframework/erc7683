@@ -42,6 +42,7 @@ interface IAttribute {
     function SpendsGas(bytes memory amountFormula) external;
     function TimingBounds(string memory field, bytes memory lowerBound, bytes memory upperBound) external;
     function NeedsStep(uint256 stepIdx) external;
+    function NeedsVariable(uint256 varIdx) external;
     function RevertPolicy(string memory policy, bytes memory expectedReason) external;
 }
 
@@ -56,6 +57,10 @@ library Attribute {
 
     function NeedsStep(uint256 stepIdx) internal pure returns (bytes memory) {
         return abi.encodeCall(IAttribute.NeedsStep, (stepIdx));
+    }
+
+    function NeedsVariable(uint256 varIdx) internal pure returns (bytes memory) {
+        return abi.encodeCall(IAttribute.NeedsVariable, (varIdx));
     }
 
     function TimingBounds(string memory field, bytes memory lowerBound, bytes memory upperBound) internal pure returns (bytes memory) {

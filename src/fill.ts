@@ -42,6 +42,8 @@ export async function fill(
       const values = await Promise.all(role.variables.map(depIdx => env.get(depIdx)));
       const resolved = await ctx.getWitnessResolver(role.kind)!.resolve(role.data, values);
       env.set(varIdx, resolved);
+    } else {
+      await env.get(varIdx);
     }
   });
 

@@ -92,6 +92,13 @@ function decodeAttribute(encoded: Hex): Attribute {
         stepIdx: toSafeNumber(stepIdx),
       };
     }
+    case 'NeedsVariable': {
+      const [varIdx] = decoded.args;
+      return {
+        type: 'NeedsVariable',
+        varIdx: toSafeNumber(varIdx),
+      };
+    }
     case 'RevertPolicy': {
       const [policy, expectedReason] = decoded.args;
       switch (policy) {

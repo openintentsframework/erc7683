@@ -29,6 +29,7 @@ export type Attribute =
   | Attribute_SpendsGas
   | Attribute_TimingBounds
   | Attribute_NeedsStep
+  | Attribute_NeedsVariable
   | Attribute_RevertPolicy;
 
 export interface Attribute_SpendsERC20 {
@@ -54,6 +55,11 @@ export interface Attribute_TimingBounds {
 export interface Attribute_NeedsStep {
   type: 'NeedsStep';
   stepIdx: number;
+}
+
+export interface Attribute_NeedsVariable {
+  type: 'NeedsVariable';
+  varIdx: number;
 }
 
 export interface Attribute_RevertPolicy {
