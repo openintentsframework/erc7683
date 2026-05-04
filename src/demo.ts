@@ -456,7 +456,7 @@ const demos: DemoRunOptions[] = [
         ],
         account: user,
       });
-      await chains[0]!.publicClient.waitForTransactionReceipt({ hash: deposit });
+      const depositReceipt = await chains[0]!.publicClient.waitForTransactionReceipt({ hash: deposit });
 
       return {
         // Payload is order-specific relay data. The SpokePool addresses are
@@ -474,8 +474,10 @@ const demos: DemoRunOptions[] = [
             { name: 'inputAmount', type: 'uint256' },
             { name: 'outputAmount', type: 'uint256' },
             { name: 'depositId', type: 'uint32' },
+            { name: 'quoteTimestamp', type: 'uint32' },
             { name: 'fillDeadline', type: 'uint32' },
             { name: 'exclusivityDeadline', type: 'uint32' },
+            { name: 'depositBlockNumber', type: 'uint256' },
             { name: 'message', type: 'bytes' },
           ],
         }], [{
@@ -489,8 +491,10 @@ const demos: DemoRunOptions[] = [
           inputAmount: amount,
           outputAmount: amount,
           depositId: 0,
+          quoteTimestamp: Number(currentTime),
           fillDeadline: Number(currentTime) + fillDeadlineOffset,
           exclusivityDeadline: 0,
+          depositBlockNumber: depositReceipt.blockNumber,
           message: '0x',
         }])),
         constructorArgs: [[1n, 2n], [originSpokePool, destinationSpokePool]],

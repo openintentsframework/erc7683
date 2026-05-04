@@ -137,6 +137,9 @@ async function waitForStepLowerBound(
   order: ResolvedOrder,
   stepId: number,
 ): Promise<void> {
+  // TODO: Abort the order if upper TimingBounds are no longer satisfiable.
+  // Prefill should catch this earlier, but once we know a timing bound is
+  // missed, continuing can only risk spending into an expired order.
   const step = order.steps[stepId]!;
   const [targetSeconds, targetBlockNumber] = await Promise.all(
     [
