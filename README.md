@@ -248,6 +248,8 @@ A resolver MUST guarantee that an order may only abort as explicitly specified i
 
 Liveness and censorship resistance of the underlying chains MAY be implicitly assumed. A particular resolver MAY make and document additional implicit assumptions (e.g., the security of a particular protocol). A solver MUST review all such implicit assumptions before a trusting a resolver.
 
+Liveness and censorship resistance of any tokens used in `SpendsERC20` attributes MAY be implicitly assumed.
+
 ### Named Assumptions
 
 Additional assumptions for a given order must be identified by a name and may be parameterized by data.
