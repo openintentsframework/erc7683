@@ -164,7 +164,7 @@ The solver MUST evaluate each element of `arguments` to a constant, encode them 
 
 If `blockNumber` is omitted, the latest block is used.
 
-The variable MUST be assigned to the value produced by interpreting the value returned by `eth_call` as a framed ABI encoding (see Values and Encoding).
+The call MUST NOT revert, and the variable MUST be assigned to the value produced by interpreting the value returned by `eth_call` as a framed ABI encoding (see Values and Encoding).
 
 #### Role: `QueryEvents`
 
