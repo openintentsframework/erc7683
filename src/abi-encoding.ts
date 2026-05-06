@@ -25,7 +25,7 @@ const DYN_PREFIX = concat([
 ]);
 
 export function decodeFramedAbi(encoded: Hex): AbiEncodedValue {
-  if (encoded.startsWith(DYN_PREFIX)) {
+  if (encoded.startsWith(DYN_PREFIX) && size(encoded) > size(DYN_PREFIX)) {
     const encoding = slice(encoded, size(DYN_PREFIX));
     return { type: 'Dynamic', encoding };
   } else {
