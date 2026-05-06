@@ -53,6 +53,10 @@ export class VariableEnv {
         return abiEncode(this.ctx.paymentRecipient, 'address');
       }
 
+      case 'StepCaller': {
+        return abiEncode(this.ctx.fillerAddress, 'address');
+      }
+
       case 'Query': {
         return decodeFramedAbi(await envCall(this.ctx, this, role));
       }

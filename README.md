@@ -126,6 +126,14 @@ No parameters.
 
 The variable MUST be assigned to the ID of the chain where the solver prefers to receive payment.
 
+#### Role: `StepCaller`
+
+Parameters:
+
+- `stepIdx`: The index of a step in the order.
+
+The variable MUST be assigned to the account used as the caller when executing the step numbered `stepIdx`.
+
 #### Role: `ExecutionOutput`
 
 Parameters:
@@ -301,6 +309,7 @@ interface IStep {
 interface IVariableRole {
     function PaymentRecipient() external;
     function PaymentChain() external;
+    function StepCaller(uint256 stepIdx) external;
     function ExecutionOutput(string calldata field, uint256 stepIdx) external;
     function Witness(string calldata kind, bytes calldata data, uint256[] calldata variables) external;
     /// @param arguments Each element is a variable index or a framed ABI encoding.

@@ -135,6 +135,10 @@ function decodeVariableRole(encoded: Hex): VariableRole {
   const decoded = decodeFunctionData({ abi: variableRoleAbi, data: encoded });
 
   switch (decoded.functionName) {
+    case 'StepCaller': {
+      const [stepIdx] = decoded.args;
+      return { type: 'StepCaller', stepIdx: toSafeNumber(stepIdx) };
+    }
     case 'ExecutionOutput': {
       const [field, stepIdx] = decoded.args;
       return { type: 'ExecutionOutput', field, stepIdx: toSafeNumber(stepIdx) };

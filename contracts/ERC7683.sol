@@ -117,6 +117,7 @@ library Payment {
 interface IVariableRole {
     function PaymentRecipient() external;
     function PaymentChain() external;
+    function StepCaller(uint256 stepIdx) external;
     function ExecutionOutput(string memory field, uint256 stepIdx) external;
     function Witness(string memory kind, bytes memory data, uint256[] memory variables) external;
     function Query(bytes memory target, bytes4 selector, bytes[] memory arguments, uint256 blockNumber) external;
@@ -138,6 +139,10 @@ library VariableRole {
 
     function PaymentChain() internal pure returns (bytes memory) {
         return abi.encodeCall(IVariableRole.PaymentChain, ());
+    }
+
+    function StepCaller(uint256 stepIdx) internal pure returns (bytes memory) {
+        return abi.encodeCall(IVariableRole.StepCaller, (stepIdx));
     }
 
     function ExecutionOutput(string memory field, uint256 stepIdx) internal pure returns (bytes memory) {
