@@ -3,7 +3,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { setTimeout } from 'node:timers/promises';
 import { formatName } from '@wonderland/interop-addresses';
 import { createERC5267Client } from 'eip712domains/viem';
-import { createPublicClient, createWalletClient, decodeFunctionData, defineChain, encodeAbiParameters, encodeFunctionData, hexToBytes, http, getAddress, parseSignature, type Address, type Hex, type PublicClient } from 'viem';
+import { createPublicClient, createWalletClient, decodeEventLog, decodeFunctionData, defineChain, encodeAbiParameters, encodeFunctionData, hexToBytes, http, getAddress, parseSignature, type Address, type Hex, type PublicClient } from 'viem';
 import { mnemonicToAccount } from 'viem/accounts';
 
 import { type SolverContext, type WalletClient } from './context.ts';
@@ -374,6 +374,7 @@ const demos: DemoRunOptions[] = [
 
       const amount = 100n;
       const fillDeadlineOffset = 60 * 60;
+      const exclusivityOffset = 2;
       const [inputToken, outputToken] = tokens;
       assert(inputToken !== undefined);
       assert(outputToken !== undefined);
@@ -431,12 +432,6 @@ const demos: DemoRunOptions[] = [
 
       // This is the user's Across deposit. The resolver will later describe
       // only the solver's fill of this deposit, not the deposit itself.
-      const currentTime = await chains[0]!.publicClient.readContract({
-        abi: demoSpokePoolArtifact.abi,
-        address: originSpokePool,
-        functionName: 'getCurrentTime',
-      });
-
       const deposit = await chains[0]!.walletClient.writeContract({
         abi: demoSpokePoolArtifact.abi,
         address: originSpokePool,
@@ -449,18 +444,33 @@ const demos: DemoRunOptions[] = [
           amount,
           amount,
           2n,
-          solverAccount,
+          solverAccount, // Use userAccount here to test delayed fill after exclusivity expires.
           fillDeadlineOffset,
-          0,
+          exclusivityOffset,
           '0x',
         ],
         account: user,
       });
       const depositReceipt = await chains[0]!.publicClient.waitForTransactionReceipt({ hash: deposit });
+      const depositEvent = depositReceipt.logs
+        .filter(log => getAddress(log.address) === originSpokePool)
+        .map(log => decodeEventLog({
+          abi: demoSpokePoolArtifact.abi,
+          data: log.data,
+          topics: log.topics,
+        }))
+        .filter(event => event.eventName === 'FundsDeposited')[0];
+      assert(depositEvent !== undefined, 'FundsDeposited event not found');
+      const depositEventArgs = depositEvent.args as unknown as {
+        depositId: bigint;
+        quoteTimestamp: number;
+        fillDeadline: number;
+        exclusivityDeadline: number;
+      };
 
       return {
-        // Payload is order-specific relay data. The SpokePool addresses are
-        // constructor configuration on the resolver, keyed by chain id.
+        constructorArgs: [[1n, 2n], [originSpokePool, destinationSpokePool]],
+
         payload: hexToBytes(encodeAbiParameters([{
           type: 'tuple',
           components: [
@@ -486,18 +496,18 @@ const demos: DemoRunOptions[] = [
           depositor: userAccount,
           recipient: userAccount,
           exclusiveRelayer: solverAccount,
+          // exclusiveRelayer: userAccount, // Test delayed fill after exclusivity expires
           inputToken,
           outputToken,
           inputAmount: amount,
           outputAmount: amount,
-          depositId: 0,
-          quoteTimestamp: Number(currentTime),
-          fillDeadline: Number(currentTime) + fillDeadlineOffset,
-          exclusivityDeadline: 0,
+          depositId: Number(depositEventArgs.depositId),
+          quoteTimestamp: depositEventArgs.quoteTimestamp,
+          fillDeadline: depositEventArgs.fillDeadline,
+          exclusivityDeadline: depositEventArgs.exclusivityDeadline,
           depositBlockNumber: depositReceipt.blockNumber,
           message: '0x',
         }])),
-        constructorArgs: [[1n, 2n], [originSpokePool, destinationSpokePool]],
       };
     },
   },

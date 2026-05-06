@@ -125,6 +125,9 @@ async function executeStep(
 }
 
 async function sleepUntilTimestamp(timestampSeconds: bigint): Promise<void> {
+  // TODO: This assumes wall-clock time approximates the target chain's
+  // block.timestamp. Waiting on observed block timestamps is more precise but
+  // can over-wait by up to the next block.
   const nowSeconds = BigInt(Math.floor(Date.now() / 1000));
   if (nowSeconds >= timestampSeconds) return;
   const sleepMs = Number((timestampSeconds - nowSeconds) * 1000n);

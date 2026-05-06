@@ -124,19 +124,30 @@ export async function envSimulateCall(
   ctx: SolverContext,
   env: VariableEnv,
   spec: CallSpec,
-): Promise<{ gasUsed: bigint; status: 'success' | 'failure' }> {
+  blockTimestamp?: bigint,
+): Promise<{ data: Hex; gasUsed: bigint; status: 'success' | 'failure' }> {
   const client = ctx.getPublicClient(spec.target.chainId);
   const data = await buildCallData(env, spec);
-  const { results } = await client.simulateCalls({
-    account: ctx.fillerAddress,
+  const [block] = await client.simulateBlocks({
     blockNumber: spec.blockNumber,
-    calls: [{ to: spec.target.address, data }],
+    blocks: [{
+      blockOverrides: blockTimestamp === undefined ? undefined : { time: blockTimestamp },
+      calls: [{
+        account: ctx.fillerAddress,
+        to: spec.target.address,
+        data,
+      }],
+    }],
   });
+  if (!block) {
+    throw new Error('simulateBlocks returned no blocks');
+  }
+  const results = block.calls;
   const [result] = results;
   if (!result) {
-    throw new Error('simulateCalls returned no results');
+    throw new Error('simulateBlocks returned no results');
   }
-  return { gasUsed: result.gasUsed, status: result.status };
+  return { data: result.data, gasUsed: result.gasUsed, status: result.status };
 }
 
 async function envGetLogs(

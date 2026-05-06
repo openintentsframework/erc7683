@@ -50,6 +50,8 @@ contract Resolver is IResolver {
         uint256 paymentRecipient = varCount++;
         uint256 originDeposit = varCount++;
         uint256 originDepositValid = varCount++;
+        uint256 step0Caller = varCount++;
+        uint256 earliestFillTimestamp = varCount++;
 
         order.variables = new bytes[](varCount);
         order.variables[paymentRecipient] = VariableRole.PaymentRecipient();
@@ -62,13 +64,27 @@ contract Resolver is IResolver {
             bytes32(0),
             p.depositBlockNumber
         );
+
         bytes[] memory originDepositValidArguments = new bytes[](2);
         originDepositValidArguments[0] = Argument.Variable(originDeposit);
         originDepositValidArguments[1] = Argument.ConstBytes(payload);
         order.variables[originDepositValid] = VariableRole.Query(
             InteroperableAddress.formatEvmV1(block.chainid, address(this)),
-            this.validateOriginDeposit.selector,
+            this.queryOriginDepositValid.selector,
             originDepositValidArguments,
+            type(uint256).max
+        );
+
+        order.variables[step0Caller] = VariableRole.StepCaller(0);
+
+        bytes[] memory earliestFillTimestampArguments = new bytes[](3);
+        earliestFillTimestampArguments[0] = Argument.Variable(step0Caller);
+        earliestFillTimestampArguments[1] = Argument.ConstAddress(p.exclusiveRelayer);
+        earliestFillTimestampArguments[2] = Argument.ConstUint256(p.exclusivityDeadline);
+        order.variables[earliestFillTimestamp] = VariableRole.Query(
+            InteroperableAddress.formatEvmV1(block.chainid, address(this)),
+            this.queryEarliestFillTimestamp.selector,
+            earliestFillTimestampArguments,
             type(uint256).max
         );
 
@@ -123,7 +139,7 @@ contract Resolver is IResolver {
         );
         step0Attributes[5] = Attribute.TimingBounds(
             "block.timestamp",
-            "",
+            Formula.Variable(earliestFillTimestamp),
             Formula.Constant(p.fillDeadline)
         );
 
@@ -152,7 +168,7 @@ contract Resolver is IResolver {
         });
     }
 
-    function validateOriginDeposit(
+    function queryOriginDepositValid(
         EthLog[] calldata logs,
         bytes calldata payload
     ) external pure returns (string memory empty, bool valid) {
@@ -184,5 +200,16 @@ contract Resolver is IResolver {
         }
 
         revert("invalid origin deposit");
+    }
+
+    function queryEarliestFillTimestamp(
+        address caller,
+        address exclusiveRelayer,
+        uint256 exclusivityDeadline
+    ) external pure returns (string memory empty, uint256 lowerBound) {
+        empty = "";
+        if (exclusivityDeadline != 0 && caller != exclusiveRelayer) {
+            lowerBound = exclusivityDeadline + 1;
+        }
     }
 }

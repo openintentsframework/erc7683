@@ -1,5 +1,5 @@
 import type { Address } from 'viem';
-import { getStepSpends } from './analysis.ts';
+import { getStepSpends, getStepTimingBounds } from './analysis.ts';
 import type { SolverContext } from './context.ts';
 import { envSimulateCall, envEval, type VariableEnv } from './env.ts';
 import type { Formula, ResolvedOrder, Step } from './types.ts';
@@ -61,6 +61,7 @@ export interface GasFlow<TAmount> {
   chainId: bigint;
   token: 'gas';
   amount?: TAmount;
+  timestampLowerBound: Formula | undefined;
   sign: -1n;
   step: Step;
 }
@@ -75,6 +76,7 @@ function collectFlowFormulas(order: ResolvedOrder): AssetFlow<Formula>[] {
       chainId: step.target.chainId,
       token: 'gas',
       amount: spends.gas,
+      timestampLowerBound: getStepTimingBounds(order, stepIdx, 'block.timestamp')?.lowerBound,
       step,
       sign: -1n,
     });
@@ -116,9 +118,10 @@ async function computeFlowAmounts(
       let amount = flow.amount && await envEval(env, flow.amount);
 
       if (amount === undefined) {
-        const { gasUsed, status } = await envSimulateCall(ctx, env, flow.step);
+        const blockTimestamp = flow.timestampLowerBound && await envEval(env, flow.timestampLowerBound);
+        const { data, gasUsed, status } = await envSimulateCall(ctx, env, flow.step, blockTimestamp);
         if (status !== 'success') {
-          throw new Error('Gas simulation failed');
+          throw new Error(`Gas simulation failed: ${data}`);
         }
         amount = gasUsed;
       }
