@@ -11,6 +11,7 @@ import { process as processOrder, type ProcessResult } from './process.ts';
 
 import basicTargetArtifact from '../out/common.sol/BasicTarget.json' with { type: 'json' };
 import demoErc20Artifact from '../out/common.sol/DemoERC20.json' with { type: 'json' };
+import dutchAuctionTargetArtifact from '../out/DutchAuction.sol/DutchAuctionTarget.json' with { type: 'json' };
 import demoSpokePoolArtifact from '../out/across.sol/DemoSpokePool.json' with { type: 'json' };
 import erc1967ProxyArtifact from '../out/ERC1967Proxy.sol/ERC1967Proxy.json' with { type: 'json' };
 
@@ -223,7 +224,7 @@ async function formatProcessResultDebug(
     const tx = await publicClient.getTransaction({ hash: receipt.transactionHash });
     assert(tx.blockNumber !== null, `Missing block number for step ${stepId}`);
     const block = await publicClient.getBlock({ blockNumber: tx.blockNumber });
-    const decoded = decodeFunctionData({ abi: [...basicTargetArtifact.abi, ...demoErc20Artifact.abi, ...demoSpokePoolArtifact.abi], data: tx.input });
+    const decoded = decodeFunctionData({ abi: [...basicTargetArtifact.abi, ...demoErc20Artifact.abi, ...dutchAuctionTargetArtifact.abi, ...demoSpokePoolArtifact.abi], data: tx.input });
 
     lines.push(
       `  • Step ${stepId}`,
@@ -245,6 +246,77 @@ const demos: DemoRunOptions[] = [
   { resolver: 'ExecutionOutput', setup: async () => ({ payload: new Uint8Array() }) },
   { resolver: 'Query', setup: async () => ({ payload: new Uint8Array() }) },
   { resolver: 'TimestampLowerBound', setup: async () => ({ payload: new Uint8Array() }) },
+
+  {
+    resolver: 'DutchAuction',
+    setup: async ({ chains, tokens, names, tokenPricesUsd }) => {
+      const token = tokens[0];
+      assert(token !== undefined);
+      tokenPricesUsd.set(addressKey(1n, token), 1n);
+
+      const targetArtifact = await import('../out/DutchAuction.sol/DutchAuctionTarget.json', { with: { type: 'json' } });
+      const targetHash = await chains[0]!.walletClient.deployContract({
+        abi: targetArtifact.default.abi,
+        bytecode: targetArtifact.default.bytecode.object as Hex,
+        account: solverAccount,
+      });
+      const targetReceipt = await chains[0]!.publicClient.waitForTransactionReceipt({ hash: targetHash });
+      assert(targetReceipt.contractAddress, 'DutchAuctionTarget deployment failed');
+      const target = getAddress(targetReceipt.contractAddress);
+      names.set(addressKey(1n, target), 'Dutch auction target');
+
+      const startAmount = 100n;
+      const minAmount = 70n;
+      const decreasePerSecond = 3n;
+      const paymentAmount = 94n;
+      const startTimestamp = BigInt(Math.floor(Date.now() / 1000));
+
+      const mint = await chains[0]!.walletClient.writeContract({
+        abi: demoErc20Artifact.abi,
+        address: token,
+        functionName: 'mint',
+        args: [solverAccount, startAmount],
+        account: solverAccount,
+      });
+      await chains[0]!.publicClient.waitForTransactionReceipt({ hash: mint });
+
+      const approval = await chains[0]!.walletClient.writeContract({
+        abi: demoErc20Artifact.abi,
+        address: token,
+        functionName: 'approve',
+        args: [target, startAmount],
+        account: solverAccount,
+      });
+      await chains[0]!.publicClient.waitForTransactionReceipt({ hash: approval });
+
+      return {
+        constructorArgs: [target],
+
+        payload: hexToBytes(encodeAbiParameters([{
+          type: 'tuple',
+          components: [
+            { name: 'chainId', type: 'uint256' },
+            { name: 'token', type: 'address' },
+            { name: 'user', type: 'address' },
+            { name: 'startTimestamp', type: 'uint256' },
+            { name: 'startAmount', type: 'uint256' },
+            { name: 'minAmount', type: 'uint256' },
+            { name: 'decreasePerSecond', type: 'uint256' },
+            { name: 'paymentAmount', type: 'uint256' },
+          ],
+        }], [{
+          chainId: 1n,
+          token,
+          user: userAccount,
+          startTimestamp,
+          startAmount,
+          minAmount,
+          decreasePerSecond,
+          paymentAmount,
+        }])),
+      };
+    },
+  },
 
   {
     resolver: 'PermitSwap',

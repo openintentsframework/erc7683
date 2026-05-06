@@ -1,7 +1,7 @@
 import type { SolverContext } from './context.ts';
 import { getDependencies, getStepTimingBounds, type DependencyNode } from './analysis.ts';
 import { envEval, type VariableEnv } from './env.ts';
-import type { AssetFlow } from './quote.ts';
+import type { AssetFlow, QuoteDecision } from './quote.ts';
 import type { Formula, ResolvedOrder } from './types.ts';
 import { memoize } from './utils.ts';
 
@@ -10,9 +10,10 @@ export async function prefill(
   order: ResolvedOrder,
   env: VariableEnv,
   flows: Required<AssetFlow<bigint>>[],
+  quoteDecisions: QuoteDecision[],
 ): Promise<void> {
   // TODO: check inventory, limits, and ERC-20 allowance here.
-  await validateWorstCaseCompletion(ctx, order, env, flows);
+  await validateWorstCaseCompletion(ctx, order, env, flows, quoteDecisions);
 }
 
 async function validateWorstCaseCompletion(
@@ -20,6 +21,7 @@ async function validateWorstCaseCompletion(
   order: ResolvedOrder,
   env: VariableEnv,
   flows: Required<AssetFlow<bigint>>[],
+  quoteDecisions: QuoteDecision[],
 ): Promise<void> {
   const now = Math.floor(Date.now() / 1000);
   const dependencies = getDependencies(order);
@@ -51,7 +53,7 @@ async function validateWorstCaseCompletion(
     ]);
 
     return [
-      Math.max(timestampLower, etaBlockLower),
+      Math.max(timestampLower, etaBlockLower, getQuoteTimestampLowerBound(quoteDecisions, stepIdx)),
       Math.min(timestampUpper, etaBlockUpper),
     ] as const;
   }));
@@ -91,4 +93,14 @@ async function validateWorstCaseCompletion(
   for (const stepIdx of order.steps.keys()) {
     visitStep(stepIdx);
   }
+}
+
+function getQuoteTimestampLowerBound(quoteDecisions: QuoteDecision[], stepIdx: number): number {
+  return Math.max(
+    -Infinity,
+    ...quoteDecisions
+      .filter(decision => decision.type === 'TimingTarget')
+      .filter(decision => decision.stepIdx === stepIdx)
+      .map(decision => Number(decision.value))
+  );
 }

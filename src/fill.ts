@@ -5,6 +5,7 @@ import { buildCallData, envEval } from './env.ts';
 import { abiEncode } from './abi-encoding.ts';
 import type { VariableEnv } from './env.ts';
 import type { ResolvedOrder } from './types.ts';
+import type { QuoteDecision } from './quote.ts';
 import { memoize } from './utils.ts';
 
 class ResolverError extends Error {
@@ -19,6 +20,7 @@ export async function fill(
   ctx: SolverContext,
   order: ResolvedOrder,
   env: VariableEnv,
+  quoteDecisions: QuoteDecision[] = [],
 ) : Promise<Partial<TransactionReceipt[]> | undefined> {
   const dependencies = getDependencies(order);
   const receipts: Partial<TransactionReceipt[]> = [];
@@ -31,7 +33,7 @@ export async function fill(
 
   const visitStep = memoize(async (stepId: number) => {
     await waitForDependencies(dependencies.steps[stepId]!);
-    await waitForStepLowerBound(ctx, env, order, stepId);
+    await waitForStepLowerBound(ctx, env, order, stepId, quoteDecisions);
     receipts[stepId] = await executeStep(ctx, env, order, stepId);
   });
 
@@ -139,6 +141,7 @@ async function waitForStepLowerBound(
   env: VariableEnv,
   order: ResolvedOrder,
   stepId: number,
+  quoteDecisions: QuoteDecision[],
 ): Promise<void> {
   // TODO: Abort the order if upper TimingBounds are no longer satisfiable.
   // Prefill should catch this earlier, but once we know a timing bound is
@@ -152,8 +155,11 @@ async function waitForStepLowerBound(
       bounds => bounds?.lowerBound && envEval(env, bounds.lowerBound)
     )
   );
+  const quoteTargetSeconds = getQuoteTimestampLowerBound(quoteDecisions, stepId);
+  const timestampTarget = maxBigint(targetSeconds, quoteTargetSeconds);
+
   await Promise.all([
-    targetSeconds && sleepUntilTimestamp(targetSeconds),
+    timestampTarget && sleepUntilTimestamp(timestampTarget),
     targetBlockNumber && new Promise<void>((resolve, reject) => {
       const publicClient = ctx.getPublicClient(step.target.chainId);
       const unwatch = publicClient.watchBlockNumber({
@@ -164,6 +170,22 @@ async function waitForStepLowerBound(
       });
     }),
   ]);
+}
+
+function getQuoteTimestampLowerBound(quoteDecisions: QuoteDecision[], stepIdx: number): bigint | undefined {
+  return quoteDecisions
+    .filter(decision => decision.type === 'TimingTarget')
+    .filter(decision => decision.stepIdx === stepIdx)
+    .reduce<bigint | undefined>(
+      (max, decision) => maxBigint(max, decision.value),
+      undefined
+    );
+}
+
+function maxBigint(a: bigint | undefined, b: bigint | undefined): bigint | undefined {
+  if (a === undefined) return b;
+  if (b === undefined) return a;
+  return a > b ? a : b;
 }
 
 async function simulateRevert(

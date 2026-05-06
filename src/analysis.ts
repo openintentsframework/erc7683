@@ -23,6 +23,13 @@ export interface Dependencies {
   variables: DependencyNode[];
 }
 
+export interface SoftExecutionOutput {
+  varIdx: number;
+  stepIdx: number;
+  field: string;
+  sourceStepIdx: number;
+}
+
 export function getStepSpends(order: ResolvedOrder, stepIdx: number): Spends {
   const spends: Spends = { erc20: [] };
   const step = order.steps[stepIdx]!;
@@ -51,11 +58,6 @@ export function getStepInputs(order: ResolvedOrder, stepIdx: number): number[] {
       inputs.add(arg.varIdx);
   }
 
-  for (const { amount } of spends.erc20) {
-    if (amount.type === 'Variable')
-      inputs.add(amount.varIdx);
-  }
-
   if (spends.gas?.type === 'Variable')
     inputs.add(spends.gas.varIdx);
 
@@ -76,6 +78,43 @@ export function getStepInputs(order: ResolvedOrder, stepIdx: number): number[] {
   }
 
   return [...inputs];
+}
+
+export function getStepSoftInputs(order: ResolvedOrder, stepIdx: number): number[] {
+  const spends = getStepSpends(order, stepIdx);
+  const inputs = new Set<number>();
+
+  for (const { amount } of spends.erc20) {
+    if (amount.type === 'Variable')
+      inputs.add(amount.varIdx);
+  }
+
+  return [...inputs];
+}
+
+export function getSoftExecutionOutputs(order: ResolvedOrder): SoftExecutionOutput[] {
+  const outputs = new Map<number, SoftExecutionOutput>();
+
+  for (const [sourceStepIdx] of order.steps.entries()) {
+    for (const varIdx of getStepSoftInputs(order, sourceStepIdx)) {
+      for (const outputVarIdx of getVariableExecutionOutputs(order, varIdx, new Set())) {
+        const role = order.variables[outputVarIdx]!;
+        if (role.type !== 'ExecutionOutput') continue;
+
+        const previous = outputs.get(outputVarIdx);
+        if (previous === undefined) {
+          outputs.set(outputVarIdx, {
+            varIdx: outputVarIdx,
+            stepIdx: role.stepIdx,
+            field: role.field,
+            sourceStepIdx,
+          });
+        }
+      }
+    }
+  }
+
+  return [...outputs.values()];
 }
 
 export function getStepRevertPolicies(
@@ -152,6 +191,39 @@ function getVariableInputs(order: ResolvedOrder, varIdx: number): number[] {
       return [];
     default:
       throw new Error(`Unsupported variable type`);
+  }
+}
+
+function* getVariableExecutionOutputs(
+  order: ResolvedOrder,
+  varIdx: number,
+  visited: Set<number>,
+): Iterable<number> {
+  if (visited.has(varIdx)) return;
+  visited.add(varIdx);
+
+  const role = order.variables[varIdx]!;
+  switch (role.type) {
+    case 'ExecutionOutput': {
+      yield varIdx;
+      break;
+    }
+
+    case 'Query': {
+      for (const arg of role.arguments) {
+        if (arg.type === 'Variable') {
+          yield* getVariableExecutionOutputs(order, arg.varIdx, visited);
+        }
+      }
+      break;
+    }
+
+    case 'Witness': {
+      for (const depIdx of role.variables) {
+        yield* getVariableExecutionOutputs(order, depIdx, visited);
+      }
+      break;
+    }
   }
 }
 

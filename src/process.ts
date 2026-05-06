@@ -4,7 +4,7 @@ import type { TransactionReceipt } from 'viem';
 import { resolve } from './resolve.ts';
 import { prequote } from './prequote.ts';
 import { prefill } from './prefill.ts';
-import { quote, type AssetFlow } from './quote.ts';
+import { quote, type AssetFlow, type QuoteDecision } from './quote.ts';
 import { fill } from './fill.ts';
 import { VariableEnv } from './env.ts';
 
@@ -13,6 +13,7 @@ export interface ProcessResult {
   env: VariableEnv;
   flows: Required<AssetFlow<bigint>>[];
   pnlUsd: bigint;
+  quoteDecisions: QuoteDecision[];
   receipts: Partial<TransactionReceipt[]> | undefined;
 }
 
@@ -30,11 +31,11 @@ export async function process(
   prequote(ctx, order);
 
   const env = new VariableEnv(ctx, order.variables);
-  const { flows, pnlUsd } = await quote(ctx, env, order);
+  const { flows, pnlUsd, decisions: quoteDecisions } = await quote(ctx, env, order);
 
-  await prefill(ctx, order, env, flows);
+  await prefill(ctx, order, env, flows, quoteDecisions);
 
-  const receipts = await fill(ctx, order, env);
+  const receipts = await fill(ctx, order, env, quoteDecisions);
 
-  return { order, env, flows, pnlUsd, receipts };
+  return { order, env, flows, pnlUsd, quoteDecisions, receipts };
 }
