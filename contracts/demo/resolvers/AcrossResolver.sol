@@ -105,7 +105,7 @@ contract Resolver is IResolver {
         } else {
             order.assumptions = new Assumption[](1);
             order.assumptions[0] = Assumption({
-                name: "non-reverting",
+                name: "non-reverting", // TODO: is this the right assumption?
                 data: InteroperableAddress.formatEvmV1(p.destinationChainId, p.recipient)
             });
         }
